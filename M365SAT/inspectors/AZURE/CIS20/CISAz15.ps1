@@ -3,7 +3,7 @@
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
-# Purpose: Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (Manual)
+# Purpose: Checks if 'Number of methods required to reset' is set to '2'
 # Author: Leonardo van de Weteringh
 
 # New Error Handler Will be Called here
@@ -13,52 +13,48 @@ Import-Module PoShLog
 $path = @($OutPath)
 
 
-function Build-CISAz1120($findings)
+function Build-CISAz150($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
-		ID			     = "CISAz1120"
-		FindingName	     = "CIS Az 1.12 - Users can add gallery apps to My Apps is set to 'Yes'"
+		ID			     = "CISAz150"
+		FindingName	     = "CIS Az 1.5 - Number of methods required to reset a password is not set to 2 or more methods"
 		ProductFamily    = "Microsoft Azure"
-		RiskScore	     = "2"
-		Description	     = "Unless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user."
-		Remediation	     = "Change the value back to False to be compliant again via the Link in PowerShellScript. There is no automatic script available at this moment unfortunately."
-		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade/~/UserSettings/menuId/UserSettings'
-		DefaultValue	 = "False"
-		ExpectedValue    = "False"
+		RiskScore	     = "3"
+		Description	     = "A Self-service Password Reset (SSPR) through Azure Multi-factor Authentication (MFA) ensures the user's identity is confirmed using two separate methods of identification. With multiple methods set, an attacker would have to compromise both methods before they could maliciously reset a user's password."
+		Remediation	     = "Manually change the value from 1 to 2 in the Azure Portal. There is no script available at this moment unfortunately."
+		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/PasswordResetMenuBlade/~/AuthenticationMethods'
+		DefaultValue	 = "2"
+		ExpectedValue    = "2"
 		ReturnedValue    = "$findings"
-		Impact		     = "2"
+		Impact		     = "3"
 		Likelihood	     = "1"
 		RiskRating	     = "Low"
-		Priority		 = "Low"
-		References	     = @(@{ 'Name' = 'Managing user consent for applications using Office 365 APIs'; 'URL' = 'https://learn.microsoft.com/en-us/archive/blogs/exchangedev/managing-user-consent-for-applications-using-office-365-apis' },
-			@{ 'Name' = 'Admin Consent for Permissions in Azure Active Directory'; 'URL' = 'https://nicksnettravels.builttoroam.com/post-2017-01-24-admin-consent-for-permissions-in-azure-active-directory-aspx/' },
-			@{ 'Name' = 'GS-3: Define and implement data protection strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-3-define-and-implement-data-protection-strategy' },
-			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-separate-and-limit-highly-privilegedadministrative-users' })
+		Priority		 = "High"
+		References	     = @(@{ 'Name' = 'Tutorial: Enable users to unlock their account or reset passwords using Microsoft Entra self-service password reset'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/tutorial-enable-sspr' },
+			@{ 'Name' = 'Combined security information registration for Microsoft Entra overview'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/concept-registration-mfa-sspr-combined' },
+			@{ 'Name' = 'IM-6: Use strong authentication controls'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-identity-management#im-6-use-strong-authentication-controls' },
+			@{ 'Name' = 'Password reset registration'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/passwords-faq#password-reset-registration' },
+			@{ 'Name' = 'Plan a Microsoft Entra self-service password reset deployment'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/howto-sspr-deployment' },
+			@{ 'Name' = 'What authentication and verification methods are available in Microsoft Entra ID?'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-methods' })
 	}
 	return $inspectorobject
 }
 
-function Audit-CISAz1120
+function Audit-CISAz150
 {
 	try
 	{
-		$AffectedOptions = @()
 		# Actual Script
-		
-		$AddGalleryApps = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/EnterpriseApplications/UserSettings' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
-		
+		$MethodsRequired = Invoke-MultiMicrosoftAPI -Url "https://main.iam.ad.ext.azure.com/api/PasswordReset/PasswordResetPolicies?getPasswordResetEnabledGroup=false" -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
 		# Validation
-		if ($AddGalleryApps.usersCanAddGalleryApps -eq $true)
+		if ($MethodsRequired.numberOfAuthenticationMethodsRequired -ne 2)
 		{
-			$AffectedOptions += "Users can add gallery apps to My Apps is set to: $($AddGalleryApps.usersCanAddGalleryApps)"
-		}
-		if ($AffectedOptions.count -igt 0)
-		{
-			$finalobject = Build-CISAz1120($AffectedOptions)
+			$finalobject = Build-CISAz150($MethodsRequired.numberOfAuthenticationMethodsRequired)
 			return $finalobject
 		}
 		return $null
+		
 	}
 	catch
 	{
@@ -135,5 +131,4 @@ function Invoke-MultiMicrosoftAPI
 	}
 	return $Response
 }
-
-return Audit-CISAz1120
+return Audit-CISAz150

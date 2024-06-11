@@ -3,7 +3,7 @@
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
-# Purpose: Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (Manual)
+# Purpose: Ensure that 'Number of days before users are asked to re-confirm their authentication information' is not set to '0'
 # Author: Leonardo van de Weteringh
 
 # New Error Handler Will be Called here
@@ -13,49 +13,48 @@ Import-Module PoShLog
 $path = @($OutPath)
 
 
-function Build-CISAz1120($findings)
+function Build-CISAz170($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
-		ID			     = "CISAz1120"
-		FindingName	     = "CIS Az 1.12 - Users can add gallery apps to My Apps is set to 'Yes'"
+		ID			     = "CISAz170"
+		FindingName	     = "CIS Az 1.7 - Number of days before users are asked to re-confirm their authentication information is set to '0'"
 		ProductFamily    = "Microsoft Azure"
-		RiskScore	     = "2"
-		Description	     = "Unless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user."
-		Remediation	     = "Change the value back to False to be compliant again via the Link in PowerShellScript. There is no automatic script available at this moment unfortunately."
-		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade/~/UserSettings/menuId/UserSettings'
-		DefaultValue	 = "False"
-		ExpectedValue    = "False"
+		RiskScore	     = "3"
+		Description	     = "This setting is necessary if you have setup 'Require users to register when signing in option'. If authentication re-confirmation is disabled, registered users will never be prompted to re-confirm their existing authentication information. If the authentication information for a user changes, such as a phone number or email, then the password reset information for that user reverts to the previously registered authentication information."
+		Remediation	     = "Manually change the value from 0 to something else e.g. 180. There is no script available at this moment unfortunately."
+		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/PasswordResetMenuBlade/~/Registration'
+		DefaultValue	 = "180"
+		ExpectedValue    = "More than 0"
 		ReturnedValue    = "$findings"
-		Impact		     = "2"
+		Impact		     = "3"
 		Likelihood	     = "1"
 		RiskRating	     = "Low"
-		Priority		 = "Low"
-		References	     = @(@{ 'Name' = 'Managing user consent for applications using Office 365 APIs'; 'URL' = 'https://learn.microsoft.com/en-us/archive/blogs/exchangedev/managing-user-consent-for-applications-using-office-365-apis' },
-			@{ 'Name' = 'Admin Consent for Permissions in Azure Active Directory'; 'URL' = 'https://nicksnettravels.builttoroam.com/post-2017-01-24-admin-consent-for-permissions-in-azure-active-directory-aspx/' },
-			@{ 'Name' = 'GS-3: Define and implement data protection strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-3-define-and-implement-data-protection-strategy' },
-			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-separate-and-limit-highly-privilegedadministrative-users' })
+		Priority		 = "Medium"
+		References	     = @(@{ 'Name' = 'How it works: Azure AD self-service password reset'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-sspr-howitworks#registration' },
+			@{ 'Name' = 'Plan an Azure Active Directory self-service password reset deployment'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/authentication/howto-sspr-deployment' },
+			@{ 'Name' = 'GS-6: Define and implement identity and privileged access strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-and-implement-identity-and-privileged-access-strategy' },
+			@{ 'Name' = 'What authentication and verification methods are available in Azure Active Directory?'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-authentication-methods' })
 	}
 	return $inspectorobject
 }
 
-function Audit-CISAz1120
+function Audit-CISAz170
 {
 	try
 	{
 		$AffectedOptions = @()
 		# Actual Script
-		
-		$AddGalleryApps = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/EnterpriseApplications/UserSettings' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
+		$MethodsRequired = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/PasswordReset/PasswordResetPolicies?getPasswordResetEnabledGroup=false' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
 		
 		# Validation
-		if ($AddGalleryApps.usersCanAddGalleryApps -eq $true)
+		if ($MethodsRequired.registrationReconfirmIntevalInDays -eq 0)
 		{
-			$AffectedOptions += "Users can add gallery apps to My Apps is set to: $($AddGalleryApps.usersCanAddGalleryApps)"
+			$AffectedOptions += "Number of days before users are asked to re-confirm their authentication information: $($MethodsRequired.registrationReconfirmIntevalInDays)"
 		}
 		if ($AffectedOptions.count -igt 0)
 		{
-			$finalobject = Build-CISAz1120($AffectedOptions)
+			$finalobject = Build-CISAz170($AffectedOptions)
 			return $finalobject
 		}
 		return $null
@@ -136,4 +135,4 @@ function Invoke-MultiMicrosoftAPI
 	return $Response
 }
 
-return Audit-CISAz1120
+return Audit-CISAz170

@@ -2,7 +2,7 @@
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
-# Purpose: Ensure that A Multi-factor Authentication Policy Exists for Administrative Groups
+# Purpose:  Ensure Multifactor Authentication is Required to access Microsoft Admin Portals
 # Author: Leonardo van de Weteringh
 
 # New Error Handler Will be Called here
@@ -12,16 +12,16 @@ Import-Module PoShLog
 $path = @($OutPath)
 
 
-function Build-CISAz124($findings)
+function Build-CISAz127($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
-		ID			     = "CISAz124"
-		FindingName	     = "CIS Az 1.2.4 - No Multi-factor Authentication Policy Exists for All Users"
+		ID			     = "CISAz127"
+		FindingName	     = "CIS Az 1.2.7 - Multifactor Authentication is not Required to access Microsoft Admin Portals"
 		ProductFamily    = "Microsoft Azure"
 		RiskScore	     = "15"
-		Description	     = "Enabling multi-factor authentication is a recommended setting to limit the potential of accounts being compromised and limiting access to authenticated personnel."
-		Remediation	     = "Please use the link described in the PowerShell Script to create an additional ConditionalAccessPolicy"
+		Description	     = "Administrative Portals for Microsoft Azure should be secured with a higher level of scrutiny to authenticating mechanisms. Enabling multifactor authentication is recommended to reduce the potential for abuse of Administrative actions, and to prevent intruders or compromised admin credentials from changing administrative settings."
+		Remediation	     = "Create an Conditional Access Policy to enable MFA For Admin Portals"
 		PowerShellScript = 'Unavailable'
 		DefaultValue	 = "null"
 		ExpectedValue    = "A policy"
@@ -30,15 +30,14 @@ function Build-CISAz124($findings)
 		Likelihood	     = "5"
 		RiskRating	     = "High"
 		Priority		 = "High"
-		References	     = @(@{ 'Name' = 'Common Conditional Access policy: Require MFA for administrators'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-policy-all-users-mfa' },
-			@{ 'Name' = 'Troubleshooting Conditional Access using the What If tool'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/troubleshoot-conditional-access-what-if' },
-			@{ 'Name' = 'Conditional Access insights and reporting'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-insights-reporting' },
+		References	     = @(@{ 'Name' = 'Conditional Access: Users, groups, and workload identities'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-conditional-access-users-groups' },
+			@{ 'Name' = 'Common Conditional Access policy: Require multifactor authentication for admins accessing Microsoft admin portals'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/how-to-policy-mfa-admin-portals' },
 			@{ 'Name' = 'IM-7: Restrict resource access based on conditions'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-identity-management#im-7-restrict-resource-access-based-on--conditions' })
 	}
 	return $inspectorobject
 }
 
-function Audit-CISAz124
+function Audit-CISAz127
 {
 	try
 	{
@@ -65,8 +64,8 @@ function Audit-CISAz124
 		# Validation
 		if ($affectedpolicy.Count -igt 0)
 		{
-			$affectedpolicy | Format-Table -AutoSize | Out-File "$path\CISAz124MFAPolicies.txt"
-			$finalobject = Build-CISAz124($affectedpolicy)
+			$affectedpolicy | Format-Table -AutoSize | Out-File "$path\CISAz127MFAPolicies.txt"
+			$finalobject = Build-CISAz127($affectedpolicy)
 			return $finalobject
 		}
 		return $null
@@ -77,4 +76,4 @@ function Audit-CISAz124
 		Write-ErrorLog 'An error occured on line {line} char {char} : {error}' -ErrorRecord $_ -PropertyValues $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.OffsetInLine, $_.InvocationInfo.Line
 	}
 }
-return Audit-CISAz124
+return Audit-CISAz127

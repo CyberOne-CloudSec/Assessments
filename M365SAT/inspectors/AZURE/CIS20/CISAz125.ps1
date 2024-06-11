@@ -1,6 +1,6 @@
 # Date: 25-1-2023
 # Version: 1.0
-# Benchmark: CIS Azure v2.0.0
+# Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
 # Purpose: Ensure Multi-factor Authentication is Required for Risky Sign-ins
 # Author: Leonardo van de Weteringh
@@ -22,7 +22,7 @@ function Build-CISAz125($findings)
 		RiskScore	     = "15"
 		Description	     = "Enabling multi-factor authentication is a recommended setting to limit the potential of accounts being compromised and limiting access to authenticated personnel."
 		Remediation	     = "Please use the link described in the PowerShell Script to create an additional ConditionalAccessPolicy"
-		PowerShellScript = 'https://hub.steampipe.io/mods/turbot/azure_compliance/controls/control.CISAz_v200_1_2_5?context=benchmark.CISAz_v200/benchmark.CISAz_v200_1/benchmark.CISAz_v200_1_2'
+		PowerShellScript = 'Unavailable'
 		DefaultValue	 = "null"
 		ExpectedValue    = "A policy"
 		ReturnedValue    = "$findings"
@@ -30,9 +30,9 @@ function Build-CISAz125($findings)
 		Likelihood	     = "5"
 		RiskRating	     = "High"
 		Priority		 = "High"
-		References	     = @(@{ 'Name' = 'Common Conditional Access policy: Sign-in risk-based multifactor authentication'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/howto-conditional-access-policy-risk' },
-			@{ 'Name' = 'Troubleshooting Conditional Access using the What If tool'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/troubleshoot-conditional-access-what-if' },
-			@{ 'Name' = 'Conditional Access insights and reporting'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/howto-conditional-access-insights-reporting' },
+		References	     = @(@{ 'Name' = 'Common Conditional Access policy: Sign-in risk-based multifactor authentication'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-policy-risk' },
+			@{ 'Name' = 'Troubleshooting Conditional Access using the What If tool'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/troubleshoot-conditional-access-what-if' },
+			@{ 'Name' = 'Conditional Access insights and reporting'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-insights-reporting' },
 			@{ 'Name' = 'IM-7: Restrict resource access based on conditions'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-identity-management#im-7-restrict-resource-access-based-on--conditions' })
 	}
 	return $inspectorobject

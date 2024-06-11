@@ -1,8 +1,8 @@
 # Date: 25-1-2023
 # Version: 1.0
-# Benchmark: CIS Azure v2.0.0
+# Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
-# Purpose: Checks the Multi-Factor Auth Status for all Non-Priviledged Users
+# Purpose: Ensure That ‘Users Can Register Applications’ Is Set to ‘No’ (Manual)
 # Author: Leonardo van de Weteringh
 
 # New Error Handler Will be Called here
@@ -11,53 +11,46 @@ Import-Module PoShLog
 #Call the OutPath Variable here
 $path = @($OutPath)
 
-function Build-CISAz113($findings)
+
+function Build-CISAz1130($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
-		ID			     = "CISAz113"
-		FindingName	     = "CIS Az 1.1.3 - Some User Accounts do not have MFA enabled"
+		ID			     = "CISAz1130"
+		FindingName	     = "CIS Az 1.13 - Users Can Register Applications Is Set to 'Yes'"
 		ProductFamily    = "Microsoft Azure"
 		RiskScore	     = "15"
-		Description	     = "With multi-factor authentication, an attacker would need to compromise at least two different authentication mechanisms, increasing the difficulty of compromise and thus reducing the risk."
-		Remediation	     = "Please enable MFA for all users through the Admin Portal. You can also use the legacy script by Adminroid"
-		PowerShellScript = 'https://admindroid.sharepoint.com/:u:/s/external/EVzUDxQqxWdLj91v3mhAipsBt0GqNmUK5b4jFXPr181Svw?e=OOcfQn&isSPOFile=1'
-		DefaultValue	 = "All Users have no MFA Enabled"
-		ExpectedValue    = "All Users have MFA Enabled"
+		Description	     = "It is recommended to only allow an administrator to register custom-developed applications. This ensures that the application undergoes a formal security review and approval process prior to exposing Microsoft Entra ID data. Certain users like developers or other high-request users may also be delegated permissions to prevent them from waiting on an administrative user. Your organization should review your policies and decide your needs."
+		Remediation	     = "Use the PowerShell Script to enable Security Defaults on Microsoft Entra ID"
+		PowerShellScript = 'Import-Module Microsoft.Graph.Identity.SignIns; $params = @{AllowedToCreateApps = $false}; Update-MgPolicyAuthorizationPolicy -BodyParameter $params'
+		DefaultValue	 = "True"
+		ExpectedValue    = "False"
 		ReturnedValue    = "$findings"
 		Impact		     = "3"
 		Likelihood	     = "5"
 		RiskRating	     = "High"
-		Priority		 = "High"
-		References	     = @(@{ 'Name' = 'How it works: Azure AD Multi-Factor Authentication'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-mfa-howitworks' },
-			@{ 'Name' = 'Azure Active Directory Premium MFA Attributes via Graph API?'; 'URL' = 'https://stackoverflow.com/questions/41156206/azure-active-directory-premium-mfa-attributes-via-graph-api' },
-			@{ 'Name' = 'IM-6: Use strong authentication controls'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-identity-management#im-6-use-strong-authentication-controls' })
+		Priority		 = "Medium"
+		References	     = @(@{ 'Name' = 'Restrict who can create applications'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/delegate-app-roles#restrict-who-can-create-applications' },
+			@{ 'Name' = 'Who has permission to add applications to my Azure AD instance?'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity-platform/how-applications-are-added#who-has-permission-to-add-applications-to-my-azure-ad-instance' },
+			@{ 'Name' = 'GS-1: Align organization roles, responsibilities and accountabilities'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-1-define-asset-management-and-data-protection-strategy' },
+			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users' },
+			@{ 'Name' = 'Managing user consent for applications using Office 365 APIs'; 'URL' = 'https://learn.microsoft.com/en-us/archive/blogs/exchangedev/managing-user-consent-for-applications-using-office-365-apis' },
+			@{ 'Name' = 'Admin Consent for Permissions in Azure Active Directory'; 'URL' = 'https://nicksnettravels.builttoroam.com/post-2017-01-24-admin-consent-for-permissions-in-azure-active-directory-aspx/' })
 	}
 	return $inspectorobject
 }
 
-function Audit-CISAz113
+function Audit-CISAz1130
 {
 	try
 	{
 		# Actual Script
-		$affectedusers = @()
-		$users = Get-Users
-		
-		foreach ($user in $users)
-		{
-			$mfaMethods = Get-MFAMethods -userId $user.id
-			if ($mfaMethods.status -eq "disabled")
-			{
-				$affectedusers += $user
-			}
-		}
+		$Policy = Get-MgPolicyAuthorizationPolicy
 		
 		# Validation
-		if ($affectedusers.count -gt 0)
+		if ($Policy.DefaultUserRolePermissions.AllowedToCreateApps -eq $true)
 		{
-			$affectedusers | Format-Table -AutoSize | Out-File "$path\CISAz113UsersNonMFA.txt"
-			$finalobject = Build-CISAz113($affectedusers.Count)
+			$finalobject = Build-CISAz1130($Policy.DefaultUserRolePermissions.AllowedToCreateApps)
 			return $finalobject
 		}
 		return $null
@@ -68,158 +61,4 @@ function Audit-CISAz113
 		Write-ErrorLog 'An error occured on line {line} char {char} : {error}' -ErrorRecord $_ -PropertyValues $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.OffsetInLine, $_.InvocationInfo.Line
 	}
 }
-
-Function Get-Users
-{
-  <#
-  .SYNOPSIS
-    Get users from the requested DN
-  #>
-	process
-	{
-		# Set the properties to retrieve
-		$select = @(
-			'id',
-			'DisplayName',
-			'userprincipalname',
-			'mail'
-		)
-		$properties = $select + "AssignedLicenses"
-		# Get enabled, disabled or both users
-		switch ($enabled)
-		{
-			"true" { $filter = "AccountEnabled eq true and UserType eq 'member'" }
-			"false" { $filter = "AccountEnabled eq false and UserType eq 'member'" }
-			"both" { $filter = "UserType eq 'member'" }
-		}
-		
-		# Check if UserPrincipalName(s) are given
-		if ($UserPrincipalName)
-		{
-			Write-host "Get users by name" -ForegroundColor Cyan
-			$users = @()
-			foreach ($user in $UserPrincipalName)
-			{
-				try
-				{
-					$users += Get-MgUser -UserId $user -Property $properties | select $select -ErrorAction Stop
-				}
-				catch
-				{
-					[PSCustomObject]@{
-						DisplayName	      = " - Not found"
-						UserPrincipalName = $User
-						isAdmin		      = $null
-						MFAEnabled	      = $null
-					}
-				}
-			}
-		}
-		else
-		{
-			if ($IsLicensed)
-			{
-				# Get only licensed users
-				$users = Get-MgUser -Filter $filter -Property $properties -all | Where-Object { ($_.AssignedLicenses).count -gt 0 } | Select-Object $select
-			}
-			else
-			{
-				$users = Get-MgUser -Filter $filter -Property $properties -all | Select-Object $select
-			}
-		}
-		return $users
-	}
-}
-
-
-Function Get-MFAMethods
-{
-  <#
-    .SYNOPSIS
-      Get the MFA status of the user
-  #>
-	param (
-		[Parameter(Mandatory = $true)]
-		$userId
-	)
-	process
-	{
-		# Get MFA details for each user
-		[array]$mfaData = Get-MgUserAuthenticationMethod -UserId $userId
-		# Create MFA details object
-		$mfaMethods = [PSCustomObject][Ordered]@{
-			status		     = "-"
-			authApp		     = "-"
-			phoneAuth	     = "-"
-			fido			 = "-"
-			helloForBusiness = "-"
-			emailAuth	     = "-"
-			tempPass		 = "-"
-			passwordLess	 = "-"
-			softwareAuth	 = "-"
-			authDevice	     = "-"
-			authPhoneNr	     = "-"
-			SSPREmail	     = "-"
-		}
-		ForEach ($method in $mfaData)
-		{
-			Switch ($method.AdditionalProperties["@odata.type"])
-			{
-				"#microsoft.graph.microsoftAuthenticatorAuthenticationMethod"  {
-					# Microsoft Authenticator App
-					$mfaMethods.authApp = $true
-					$mfaMethods.authDevice = $method.AdditionalProperties["displayName"]
-					$mfaMethods.status = "enabled"
-				}
-				"#microsoft.graph.phoneAuthenticationMethod"                  {
-					# Phone authentication
-					$mfaMethods.phoneAuth = $true
-					$mfaMethods.authPhoneNr = $method.AdditionalProperties["phoneType", "phoneNumber"] -join ' '
-					$mfaMethods.status = "enabled"
-				}
-				"#microsoft.graph.fido2AuthenticationMethod"                   {
-					# FIDO2 key
-					$mfaMethods.fido = $true
-					$fifoDetails = $method.AdditionalProperties["model"]
-					$mfaMethods.status = "enabled"
-				}
-				"#microsoft.graph.passwordAuthenticationMethod"                {
-					# Password
-					# When only the password is set, then MFA is disabled.
-					if ($mfaMethods.status -ne "enabled") { $mfaMethods.status = "disabled" }
-				}
-				"#microsoft.graph.windowsHelloForBusinessAuthenticationMethod" {
-					# Windows Hello
-					$mfaMethods.helloForBusiness = $true
-					$helloForBusinessDetails = $method.AdditionalProperties["displayName"]
-					$mfaMethods.status = "enabled"
-				}
-				"#microsoft.graph.emailAuthenticationMethod"                   {
-					# Email Authentication
-					$mfaMethods.emailAuth = $true
-					$mfaMethods.SSPREmail = $method.AdditionalProperties["emailAddress"]
-					$mfaMethods.status = "enabled"
-				}
-				"microsoft.graph.temporaryAccessPassAuthenticationMethod"    {
-					# Temporary Access pass
-					$mfaMethods.tempPass = $true
-					$tempPassDetails = $method.AdditionalProperties["lifetimeInMinutes"]
-					$mfaMethods.status = "enabled"
-				}
-				"#microsoft.graph.passwordlessMicrosoftAuthenticatorAuthenticationMethod" {
-					# Passwordless
-					$mfaMethods.passwordLess = $true
-					$passwordLessDetails = $method.AdditionalProperties["displayName"]
-					$mfaMethods.status = "enabled"
-				}
-				"#microsoft.graph.softwareOathAuthenticationMethod" {
-					# ThirdPartyAuthenticator
-					$mfaMethods.softwareAuth = $true
-					$mfaMethods.status = "enabled"
-				}
-			}
-		}
-		Return $mfaMethods
-	}
-}
-return Audit-CISAz113
+return Audit-CISAz1130

@@ -1,6 +1,6 @@
 # Date: 25-1-2023
 # Version: 1.0
-# Benchmark: CIS Azure v2.0.0
+# Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
 # Purpose: Checks if Trusted Locations are defined and enabled as trusted
 # Author: Leonardo van de Weteringh
@@ -29,7 +29,7 @@ function Build-CISAz121($findings)
 		Likelihood	     = "5"
 		RiskRating	     = "Medium"
 		Priority		 = "Low"
-		References	     = @(@{ 'Name' = 'Using the location condition in a Conditional Access policy'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/location-condition' },
+		References	     = @(@{ 'Name' = 'Using the location condition in a Conditional Access policy'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/location-condition' },
 			@{ 'Name' = 'IM-7: Restrict resource access based on conditions'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-identity-management#im-7-restrict-resource-access-based-on--conditions' })
 	}
 	return $inspectorobject

@@ -1,6 +1,6 @@
 # Date: 25-1-2023
 # Version: 1.0
-# Benchmark: CIS Azure v2.0.0
+# Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
 # Purpose: Ensure that A Multi-factor Authentication Policy Exists for Administrative Groups
 # Author: Leonardo van de Weteringh
@@ -30,11 +30,11 @@ function Build-CISAz123($findings)
 		Likelihood	     = "5"
 		RiskRating	     = "Critical"
 		Priority		 = "Critical"
-		References	     = @(@{ 'Name' = 'Common Conditional Access policy: Require MFA for administrators'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/howto-conditional-access-policy-admin-mfa' },
-			@{ 'Name' = 'Manage emergency access accounts in Azure AD'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/roles/security-emergency-access' },
-			@{ 'Name' = 'Troubleshooting Conditional Access using the What If tool'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/troubleshoot-conditional-access-what-if' },
-			@{ 'Name' = 'Conditional Access insights and reporting'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/howto-conditional-access-insights-reporting' },
-			@{ 'Name' = 'Plan a Conditional Access deployment'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/plan-conditional-access' },
+		References	     = @(@{ 'Name' = 'Common Conditional Access policy: Require MFA for administrators'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-policy-admin-mfa' },
+			@{ 'Name' = 'Manage emergency access accounts in Azure AD'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/security-emergency-access' },
+			@{ 'Name' = 'Troubleshooting Conditional Access using the What If tool'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/troubleshoot-conditional-access-what-if' },
+			@{ 'Name' = 'Conditional Access insights and reporting'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-insights-reporting' },
+			@{ 'Name' = 'Plan a Conditional Access deployment'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/plan-conditional-access' },
 			@{ 'Name' = 'IM-7: Restrict resource access based on conditions'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-identity-management#im-7-restrict-resource-access-based-on--conditions' })
 	}
 	return $inspectorobject

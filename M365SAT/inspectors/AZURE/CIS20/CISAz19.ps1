@@ -3,7 +3,7 @@
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
-# Purpose: Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (Manual)
+# Purpose: Ensure That 'Notify all admins when other admins reset their password?' is set to 'Yes'
 # Author: Leonardo van de Weteringh
 
 # New Error Handler Will be Called here
@@ -13,49 +13,50 @@ Import-Module PoShLog
 $path = @($OutPath)
 
 
-function Build-CISAz1120($findings)
+function Build-CISAz190($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
-		ID			     = "CISAz1120"
-		FindingName	     = "CIS Az 1.12 - Users can add gallery apps to My Apps is set to 'Yes'"
+		ID			     = "CISAz190"
+		FindingName	     = "CIS Az 1.9 - Notify all admins when other admins reset their password?' is set to 'No'"
 		ProductFamily    = "Microsoft Azure"
-		RiskScore	     = "2"
-		Description	     = "Unless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user."
-		Remediation	     = "Change the value back to False to be compliant again via the Link in PowerShellScript. There is no automatic script available at this moment unfortunately."
-		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade/~/UserSettings/menuId/UserSettings'
+		RiskScore	     = "15"
+		Description	     = "Global Administrator accounts are sensitive. Any password reset activity notification, when sent to all Global Administrators, ensures that all Global administrators can passively confirm if such a reset is a common pattern within their group. For example, if all Global Administrators change their password every 30 days, any password reset activity before that may require administrator(s) to evaluate any unusual activity and confirm its origin."
+		Remediation	     = "Change the value manually. There is no automatic script available at this moment unfortunately."
+		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/PasswordResetMenuBlade/~/Notifications'
 		DefaultValue	 = "False"
-		ExpectedValue    = "False"
+		ExpectedValue    = "True"
 		ReturnedValue    = "$findings"
-		Impact		     = "2"
-		Likelihood	     = "1"
-		RiskRating	     = "Low"
-		Priority		 = "Low"
-		References	     = @(@{ 'Name' = 'Managing user consent for applications using Office 365 APIs'; 'URL' = 'https://learn.microsoft.com/en-us/archive/blogs/exchangedev/managing-user-consent-for-applications-using-office-365-apis' },
-			@{ 'Name' = 'Admin Consent for Permissions in Azure Active Directory'; 'URL' = 'https://nicksnettravels.builttoroam.com/post-2017-01-24-admin-consent-for-permissions-in-azure-active-directory-aspx/' },
-			@{ 'Name' = 'GS-3: Define and implement data protection strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-3-define-and-implement-data-protection-strategy' },
-			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-separate-and-limit-highly-privilegedadministrative-users' })
+		Impact		     = "3"
+		Likelihood	     = "5"
+		RiskRating	     = "High"
+		Priority		 = "High"
+		References	     = @(@{ 'Name' = 'Notifications'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/concept-sspr-howitworks#notifications' },
+			@{ 'Name' = 'Plan a Microsoft Entra self-service password reset deployment'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/howto-sspr-deployment' },
+			@{ 'Name' = 'GS-6: Define and implement identity and privileged access strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-and-implement-identity-and-privileged-access-strategy' },
+			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-separate-and-limit-highly-privilegedadministrative-users' },
+			@{ 'Name' = 'Set up notifications and customizations'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/authentication/tutorial-enable-sspr#set-up-notifications-and-customizations' })
 	}
 	return $inspectorobject
 }
 
-function Audit-CISAz1120
+function Audit-CISAz190
 {
 	try
 	{
 		$AffectedOptions = @()
 		# Actual Script
 		
-		$AddGalleryApps = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/EnterpriseApplications/UserSettings' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
+		$MethodsRequired = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/PasswordReset/PasswordResetPolicies?getPasswordResetEnabledGroup=false' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
 		
 		# Validation
-		if ($AddGalleryApps.usersCanAddGalleryApps -eq $true)
+		if ($MethodsRequired.notifyOnAdminPasswordReset -eq $false)
 		{
-			$AffectedOptions += "Users can add gallery apps to My Apps is set to: $($AddGalleryApps.usersCanAddGalleryApps)"
+			$AffectedOptions += "Notify all admins when other admins reset their password? is set to: $($MethodsRequired.notifyOnAdminPasswordReset)"
 		}
 		if ($AffectedOptions.count -igt 0)
 		{
-			$finalobject = Build-CISAz1120($AffectedOptions)
+			$finalobject = Build-CISAz190($AffectedOptions)
 			return $finalobject
 		}
 		return $null
@@ -136,4 +137,4 @@ function Invoke-MultiMicrosoftAPI
 	return $Response
 }
 
-return Audit-CISAz1120
+return Audit-CISAz190

@@ -1,6 +1,6 @@
 # Date: 25-1-2023
 # Version: 1.0
-# Benchmark: CISAz Azure v2.0.0
+# Benchmark: CISAz Azure v2.1.0
 # Product Family: Microsoft Azure
 # Purpose: Checks Microsoft Defender Subscriptions
 # Author: Leonardo van de Weteringh
@@ -13,7 +13,7 @@ Import-Module PoShLog
 $path = @($OutPath)
 
 
-function Build-CISAz21x($findings)
+function Build-CISAz211($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
@@ -24,7 +24,7 @@ function Build-CISAz21x($findings)
 		Description	     = "Enabling Microsoft Defender allows for greater defense-in-depth, with threat detection provided by the Microsoft Security Response Center (MSRC)."
 		Remediation	     = "Use the powershell command and replace SubScriptionName with the corresponding subscription which has a Free Pricing Tier at the moment."
 		PowerShellScript = 'Set-AzSecurityPricing -Name "<SubscriptionName>" -PricingTier "Standard"'
-		DefaultValue	 = "Free or None"
+		DefaultValue	 = "By default, Microsoft Defender plan is off (None) or set to Free"
 		ExpectedValue    = "Standard"
 		ReturnedValue    = "$findings"
 		Impact		     = "1"
@@ -38,7 +38,7 @@ function Build-CISAz21x($findings)
 	return $inspectorobject
 }
 
-function Audit-CISAz21x
+function Audit-CISAz211
 {
 	try
 	{
@@ -58,7 +58,7 @@ function Audit-CISAz21x
 		# Validation
 		if ($AffectedMicrosoftDefenderSubscriptions.count -igt 0)
 		{
-			$finalobject = Build-CISAz21x($AffectedMicrosoftDefenderSubscriptions)
+			$finalobject = Build-CISAz211($AffectedMicrosoftDefenderSubscriptions)
 			return $finalobject
 		}
 		return $null
@@ -69,4 +69,4 @@ function Audit-CISAz21x
 		Write-ErrorLog 'An error occured on line {line} char {char} : {error}' -ErrorRecord $_ -PropertyValues $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.OffsetInLine, $_.InvocationInfo.Line
 	}
 }
-return Audit-CISAz21x
+return Audit-CISAz211

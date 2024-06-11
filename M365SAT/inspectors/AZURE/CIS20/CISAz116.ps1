@@ -3,7 +3,7 @@
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
-# Purpose: Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (Manual)
+# Purpose: Ensure That 'Restrict access to Microsoft Entra admin center' is Set to 'Yes' (Manual)
 # Author: Leonardo van de Weteringh
 
 # New Error Handler Will be Called here
@@ -13,49 +13,50 @@ Import-Module PoShLog
 $path = @($OutPath)
 
 
-function Build-CISAz1120($findings)
+function Build-CISAz1160($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
-		ID			     = "CISAz1120"
-		FindingName	     = "CIS Az 1.12 - Users can add gallery apps to My Apps is set to 'Yes'"
+		ID			     = "CISAz1160"
+		FindingName	     = "CIS Az 1.16 - 'Restrict access to Azure AD administration portal is set to 'No'"
 		ProductFamily    = "Microsoft Azure"
-		RiskScore	     = "2"
-		Description	     = "Unless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user."
-		Remediation	     = "Change the value back to False to be compliant again via the Link in PowerShellScript. There is no automatic script available at this moment unfortunately."
-		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade/~/UserSettings/menuId/UserSettings'
+		RiskScore	     = "10"
+		Description	     = "The Microsoft Entra ID administrative portal has sensitive data and permission settings. All non-administrators should be prohibited from accessing any Entra ID data in the administration portal to avoid exposure"
+		Remediation	     = "Change the Value to True to restrict non-admin users from accessing sensitive data. There is no automatic script available at this moment unfortunately."
+		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/UserSettings'
 		DefaultValue	 = "False"
-		ExpectedValue    = "False"
+		ExpectedValue    = "True"
 		ReturnedValue    = "$findings"
 		Impact		     = "2"
-		Likelihood	     = "1"
-		RiskRating	     = "Low"
-		Priority		 = "Low"
-		References	     = @(@{ 'Name' = 'Managing user consent for applications using Office 365 APIs'; 'URL' = 'https://learn.microsoft.com/en-us/archive/blogs/exchangedev/managing-user-consent-for-applications-using-office-365-apis' },
-			@{ 'Name' = 'Admin Consent for Permissions in Azure Active Directory'; 'URL' = 'https://nicksnettravels.builttoroam.com/post-2017-01-24-admin-consent-for-permissions-in-azure-active-directory-aspx/' },
-			@{ 'Name' = 'GS-3: Define and implement data protection strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-3-define-and-implement-data-protection-strategy' },
+		Likelihood	     = "5"
+		RiskRating	     = "High"
+		Priority		 = "High"
+		References	     = @(@{ 'Name' = 'The Azure AD portal strikes back'; 'URL' = 'https://call4cloud.nl/2020/07/the-azure-ad-portal-strikes-back/' },
+			@{ 'Name' = 'Microsoft Entra built-in roles'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference' },
+			@{ 'Name' = 'GS-2: Define and implement enterprise segmentation/separation of duties strategyment'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-and-implement-enterprise-segmentationseparation-of-duties-strategy' },
+			@{ 'Name' = 'GS-6: Define and implement identity and privileged access strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-and-implement-identity-and-privileged-access-strategy' },
 			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-separate-and-limit-highly-privilegedadministrative-users' })
 	}
 	return $inspectorobject
 }
 
-function Audit-CISAz1120
+function Audit-CISAz1160
 {
 	try
 	{
 		$AffectedOptions = @()
-		# Actual Script
+		# Actual Script 
 		
-		$AddGalleryApps = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/EnterpriseApplications/UserSettings' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
+		$MethodsRequired = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/Directories/Properties' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
 		
 		# Validation
-		if ($AddGalleryApps.usersCanAddGalleryApps -eq $true)
+		if ($MethodsRequired.restrictNonAdminUsers -eq $false)
 		{
-			$AffectedOptions += "Users can add gallery apps to My Apps is set to: $($AddGalleryApps.usersCanAddGalleryApps)"
+			$AffectedOptions += "Restrict access to Azure AD administration portal is set to: $($MethodsRequired.notifyUsersOnPasswordReset)"
 		}
 		if ($AffectedOptions.count -igt 0)
 		{
-			$finalobject = Build-CISAz1120($AffectedOptions)
+			$finalobject = Build-CISAz1160($AffectedOptions)
 			return $finalobject
 		}
 		return $null
@@ -135,5 +136,4 @@ function Invoke-MultiMicrosoftAPI
 	}
 	return $Response
 }
-
-return Audit-CISAz1120
+return Audit-CISAz1160

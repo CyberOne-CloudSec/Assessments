@@ -1,6 +1,6 @@
 # Date: 25-1-2023
 # Version: 1.0
-# Benchmark: CIS Azure v2.0.0
+# Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
 # Purpose: Ensure Multi-factor Authentication is Required for Azure Management
 # Author: Leonardo van de Weteringh
@@ -17,12 +17,12 @@ function Build-CISAz126($findings)
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
 		ID			     = "CISAz126"
-		FindingName	     = "CIS Az 1.2.6 - Ensure Multi-factor Authentication is Required for Azure Management"
+		FindingName	     = "CIS Az 1.2.6 - Multifactor Authentication is not Required for Windows Azure Service Management API"
 		ProductFamily    = "Microsoft Azure"
 		RiskScore	     = "15"
-		Description	     = "Enabling multi-factor authentication is a recommended setting to limit the use of Administrative actions and to prevent intruders from changing settings."
+		Description	     = "Administrative access to the Windows Azure Service Management API should be secured with a higher level of scrutiny to authenticating mechanisms. Enabling multifactor authentication is recommended to reduce the potential for abuse of Administrative actions, and to prevent intruders or compromised admin credentials from changing administrative settings."
 		Remediation	     = "Please use the link described in the PowerShell Script to create an additional ConditionalAccessPolicy"
-		PowerShellScript = 'https://hub.steampipe.io/mods/turbot/azure_compliance/controls/control.CISAz_v200_1_2_6?context=benchmark.CISAz_v200/benchmark.CISAz_v200_1/benchmark.CISAz_v200_1_2'
+		PowerShellScript = 'Unavailable'
 		DefaultValue	 = "null"
 		ExpectedValue    = "A policy"
 		ReturnedValue    = "$findings"
@@ -30,7 +30,9 @@ function Build-CISAz126($findings)
 		Likelihood	     = "5"
 		RiskRating	     = "High"
 		Priority		 = "High"
-		References	     = @(@{ 'Name' = 'Conditional Access: Users, groups, and workload identities'; 'URL' = 'https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/concept-conditional-access-users-groups' },
+		References	     = @(@{ 'Name' = 'Conditional Access: Users, groups, and workload identities'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-conditional-access-users-groups' },
+			@{ 'Name' = 'Common Conditional Access policy: Require MFA for Azure management'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-policy-azure-management' },
+			@{ 'Name' = 'Windows Azure Service Management API'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-conditional-access-cloud-apps#windows-azure-service-management-api' },
 			@{ 'Name' = 'IM-7: Restrict resource access based on conditions'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-identity-management#im-7-restrict-resource-access-based-on--conditions' })
 	}
 	return $inspectorobject

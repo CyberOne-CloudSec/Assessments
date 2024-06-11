@@ -1,9 +1,8 @@
-#Requires -module Az.Accounts
 # Date: 25-1-2023
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
-# Purpose: Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (Manual)
+# Purpose: Ensure that 'Owners can manage group membership requests in the Access Panel' is set to 'No'
 # Author: Leonardo van de Weteringh
 
 # New Error Handler Will be Called here
@@ -13,49 +12,48 @@ Import-Module PoShLog
 $path = @($OutPath)
 
 
-function Build-CISAz1120($findings)
+function Build-CISAz1190($findings)
 {
 	#Actual Inspector Object that will be returned. All object values are required to be filled in.
 	$inspectorobject = New-Object PSObject -Property @{
-		ID			     = "CISAz1120"
-		FindingName	     = "CIS Az 1.12 - Users can add gallery apps to My Apps is set to 'Yes'"
+		ID			     = "CISAz1190"
+		FindingName	     = "CIS Az 1.19 - Owners can manage group membership requests in the Access Panel is set to Yes"
 		ProductFamily    = "Microsoft Azure"
-		RiskScore	     = "2"
-		Description	     = "Unless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user."
-		Remediation	     = "Change the value back to False to be compliant again via the Link in PowerShellScript. There is no automatic script available at this moment unfortunately."
-		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade/~/UserSettings/menuId/UserSettings'
-		DefaultValue	 = "False"
+		RiskScore	     = "3"
+		Description	     = "Restricting security group management to administrators only prohibits users from making changes to security groups. This ensures that security groups are appropriately managed and their management is not delegated to non-administrators."
+		Remediation	     = "Change the value back to False to be compliant again. There is no automatic script available at this moment unfortunately."
+		PowerShellScript = 'https://portal.azure.com/#view/Microsoft_AAD_IAM/GroupsManagementMenuBlade/~/General'
+		DefaultValue	 = "True"
 		ExpectedValue    = "False"
 		ReturnedValue    = "$findings"
-		Impact		     = "2"
+		Impact		     = "3"
 		Likelihood	     = "1"
 		RiskRating	     = "Low"
-		Priority		 = "Low"
-		References	     = @(@{ 'Name' = 'Managing user consent for applications using Office 365 APIs'; 'URL' = 'https://learn.microsoft.com/en-us/archive/blogs/exchangedev/managing-user-consent-for-applications-using-office-365-apis' },
-			@{ 'Name' = 'Admin Consent for Permissions in Azure Active Directory'; 'URL' = 'https://nicksnettravels.builttoroam.com/post-2017-01-24-admin-consent-for-permissions-in-azure-active-directory-aspx/' },
-			@{ 'Name' = 'GS-3: Define and implement data protection strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-3-define-and-implement-data-protection-strategy' },
-			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-separate-and-limit-highly-privilegedadministrative-users' })
+		Priority		 = "High"
+		References	     = @(@{ 'Name' = 'Set up self-service group management in Microsoft Entra ID'; 'URL' = 'https://learn.microsoft.com/en-us/entra/identity/users/groups-self-service-management#making-a-group-available-for-end-user-self-service' },
+			@{ 'Name' = 'PA-1: Separate and limit highly privileged/administrative users'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-separate-and-limit-highly-privilegedadministrative-users' },
+			@{ 'Name' = 'GS-2: Define and implement enterprise segmentation/separation of duties strategyment'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-and-implement-enterprise-segmentationseparation-of-duties-strategy' },
+			@{ 'Name' = 'GS-6: Define and implement identity and privileged access strategy'; 'URL' = 'https://learn.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-and-implement-identity-and-privileged-access-strategy' })
 	}
-	return $inspectorobject
+return $inspectorobject
 }
 
-function Audit-CISAz1120
+function Audit-CISAz1190
 {
 	try
 	{
 		$AffectedOptions = @()
-		# Actual Script
-		
-		$AddGalleryApps = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/EnterpriseApplications/UserSettings' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
+		# Actual Script 
+		$SelfServiceGroupSetting = Invoke-MultiMicrosoftAPI -Url 'https://main.iam.ad.ext.azure.com/api/Directories/SsgmProperties' -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -Method 'GET'
 		
 		# Validation
-		if ($AddGalleryApps.usersCanAddGalleryApps -eq $true)
+		if ($SelfServiceGroupSetting.selfServiceGroupManagementEnabled -eq $true)
 		{
-			$AffectedOptions += "Users can add gallery apps to My Apps is set to: $($AddGalleryApps.usersCanAddGalleryApps)"
+			$AffectedOptions += "Owners can manage group membership requests in the Access Panel is set to: $($SelfServiceGroupSetting.selfServiceGroupManagementEnabled)"
 		}
 		if ($AffectedOptions.count -igt 0)
 		{
-			$finalobject = Build-CISAz1120($AffectedOptions)
+			$finalobject = Build-CISAz1190($AffectedOptions)
 			return $finalobject
 		}
 		return $null
@@ -135,5 +133,4 @@ function Invoke-MultiMicrosoftAPI
 	}
 	return $Response
 }
-
-return Audit-CISAz1120
+return Audit-CISAz1190
