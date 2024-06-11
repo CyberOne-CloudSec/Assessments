@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 #Requires -RunAsAdministrator
 
-param ($outPath,$userPrincipalName,$services)
+param ($outPath,$userPrincipalName)
 
 function ExecuteM365SAT
 {
