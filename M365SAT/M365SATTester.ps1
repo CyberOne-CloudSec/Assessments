@@ -16,7 +16,7 @@ function ExecuteM365SAT
 		-BenchmarkVersion LATEST `
 		-LicenseMode All `
 		-LicenseLevel All `
-		-EnvironmentType $services
+		-EnvironmentType AZURE,M365
   
 	Remove-Module M365SAT -Force
 }
