@@ -1,4 +1,4 @@
-<# Date: 25-1-2023
+# Date: 25-1-2023
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
@@ -41,13 +41,13 @@ function Audit-CISAz317
 	try
 	{
 		$violation = @()
-		$StorageAccounts = Get-AzStorageAccount
+		<#$StorageAccounts = Get-AzStorageAccount
 		foreach ($StorageAccount in $StorageAccounts){
 			if ($StorageAccount.AllowBlobPublicAccess -eq $true){
 				$violation += $StorageAccount.StorageAccountName
 			}
 		}
-		$violation
+		$violation#>
 
 		if ($violation.Count -igt 0){
 			$finalobject = Build-CISAz317($violation)
