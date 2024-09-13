@@ -38,16 +38,16 @@ function Build-CISAz317($findings)
 
 function Audit-CISAz317
 {
-	try
+	<#try
 	{
 		$violation = @()
-		<#$StorageAccounts = Get-AzStorageAccount
+		$StorageAccounts = Get-AzStorageAccount
 		foreach ($StorageAccount in $StorageAccounts){
 			if ($StorageAccount.AllowBlobPublicAccess -eq $true){
 				$violation += $StorageAccount.StorageAccountName
 			}
 		}
-		$violation#>
+		$violation
 
 		if ($violation.Count -igt 0){
 			$finalobject = Build-CISAz317($violation)
@@ -59,6 +59,6 @@ function Audit-CISAz317
 	{
 		Write-WarningLog 'The Inspector: {inspector} was terminated!' -PropertyValues $_.InvocationInfo.ScriptName
 		Write-ErrorLog 'An error occured on line {line} char {char} : {error}' -ErrorRecord $_ -PropertyValues $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.OffsetInLine, $_.InvocationInfo.Line
-	}
+	}#>Write-WarningLog 'The Inspector: CISAz317 was terminated!
 }
 return Audit-CISAz317
