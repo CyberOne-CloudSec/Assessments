@@ -1,4 +1,4 @@
-# Date: 25-1-2023
+<# Date: 25-1-2023
 # Version: 1.0
 # Benchmark: CIS Azure v2.1.0
 # Product Family: Microsoft Azure
