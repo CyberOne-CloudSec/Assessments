@@ -59,6 +59,6 @@ function Audit-CISAz317
 	{
 		Write-WarningLog 'The Inspector: {inspector} was terminated!' -PropertyValues $_.InvocationInfo.ScriptName
 		Write-ErrorLog 'An error occured on line {line} char {char} : {error}' -ErrorRecord $_ -PropertyValues $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.OffsetInLine, $_.InvocationInfo.Line
-	}#>Write-WarningLog 'The Inspector: CISAz317 was terminated!
+	}#>Write-WarningLog 'The Inspector: CISAz317 was terminated!'
 }
 return Audit-CISAz317
