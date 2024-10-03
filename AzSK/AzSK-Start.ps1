@@ -1,4 +1,5 @@
 #CHECK IF MODULES EXISTS
+write-host "RUNNING AZSK SCRIPT`n" -f CYAN
 write-host "CHECKING MODULES" -f yellow
 
 $ErrorActionPreference= 'SilentlyContinue'
