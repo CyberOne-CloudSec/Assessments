@@ -35,18 +35,21 @@ Connect-AzAccount
 #CAPTURE SUBSCRIPTIONS
 write-host "CAPTURE SUBSCRIPTIONS" -f yellow
 
-# Get the path to the Documents folder
-$documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
+#CREATE DIRECTORY FOLDERS
+$path = 'C:\BPA'
+$getDate = Get-Date -Format 'MM/dd/yyyy'
+$date = $getDate -replace '/','.'
+$mainPath = $path+'-'+$date+'\'
+$azskPath = $mainPath+"AzSK"
 
 # List files in the Documents folder
-Get-AzSubscription | Export-Csv -Path "$documentsPath\subscriptions.csv" -NoTypeInformation
-$Subs = Import-Csv -Path "$documentsPath\subscriptions.csv"
+Get-AzSubscription | Export-Csv -Path "$azskPath\subscriptions.csv" -NoTypeInformation
+$Subs = Import-Csv -Path "$azskPath\subscriptions.csv"
 
 # CAPTURE RESOURCE GROUPS
 Write-Host "CAPTURE RESOURCE GROUPS" -ForegroundColor Yellow
-Get-AzResourceGroup | Select-Object ResourceGroupName | Export-Csv -Path "$documentsPath\resourcegroups.csv" -NoTypeInformation
-$ResourceGroups = Import-Csv -Path "$documentsPath\resourcegroups.csv"
-
+Get-AzResourceGroup | Select-Object ResourceGroupName | Export-Csv -Path "$azskPath\resourcegroups.csv" -NoTypeInformation
+$ResourceGroups = Import-Csv -Path "$azskPath\resourcegroups.csv"
 
 #SUBSCRIPTION SECURITY STATUS
 write-host "RUN SUBSCRIPTION SECURITY STATUS" -f yellow
