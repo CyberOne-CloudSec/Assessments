@@ -9,7 +9,7 @@ foreach($m in $Modules){
 		$module = Get-Module -ListAvailable | where-Object {$_.Name -like $name} | select name
 			
 		if($module.name -ne $null){
-			write-host "Module already installed: $m" -Foreground green
+			write-host "[+] $m installed" -Foreground green
 			Import-Module -Name $m
 		}
 		else{
@@ -22,7 +22,7 @@ foreach($m in $Modules){
 		$module = Get-Module -Name $m -ListAvailable | select name
 			
 		if($module.name -ne $null){
-			write-host "Module already installed: $m" -Foreground green
+			write-host "[+] $m installed" -Foreground green
 			Import-Module -Name $m
 		}
 		else{
