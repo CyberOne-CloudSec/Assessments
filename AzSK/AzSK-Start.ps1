@@ -3,7 +3,6 @@ write-host "RUNNING AZSK SCRIPT`n" -f CYAN
 write-host "CHECKING MODULES" -f yellow
 
 $ErrorActionPreference= 'SilentlyContinue'
-$WarningPreference = 'SilentlyContinue'
 $Modules = @('Az','AzSK')
 
 foreach($m in $Modules){
@@ -36,7 +35,6 @@ foreach($m in $Modules){
 	}
 }
 $ErrorActionPreference= 'Stop'
-$WarningPreference = 'Stop'
 
 #CONNECT TO TENANT AND AZURE AD
 Connect-AzAccount
