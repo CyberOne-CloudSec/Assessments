@@ -1,4 +1,6 @@
 #CHECK IF MODULES EXISTS
+write-host "CHECK IF MODULES EXISTS" -f yellow
+
 $Modules = @('Az','AzSK')
 
 foreach($m in $Modules){
@@ -8,12 +10,12 @@ foreach($m in $Modules){
 			
 		if($module.name -ne $null){
 			write-host "Module already installed: $m" -Foreground green
-			Import-Module -Name $m 2>$null
+			Import-Module -Name $m 4>$null
 		}
 		else{
 			write-host "Installing module: $m" -Foreground yellow
 			Install-Module -Name $m -Scope CurrentUser -Force -AllowClobber
-   			Import-Module -Name $m 2>$null
+   			Import-Module -Name $m 4>$null
 		}
 	}
 	else{
@@ -21,12 +23,12 @@ foreach($m in $Modules){
 			
 		if($module.name -ne $null){
 			write-host "Module already installed: $m" -Foreground green
-			Import-Module -Name $m 2>$null
+			Import-Module -Name $m 4>$null
 		}
 		else{
 			write-host "Installing module: $m" -Foreground yellow
 			Install-Module $m -SkipPublisherCheck -Scope CurrentUser -AllowClobber -Force
-   			Import-Module -Name $m 2>$null
+   			Import-Module -Name $m 4>$null
 		}
 	}
 }
