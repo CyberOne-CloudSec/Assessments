@@ -1,7 +1,8 @@
 #CHECK IF MODULES EXISTS
 write-host "CHECKING MODULES" -f yellow
 
-$ErrorActionPreference= 'silentlycontinue'
+$ErrorActionPreference= 'SilentlyContinue'
+$WarningPreference = 'SilentlyContinue'
 $Modules = @('Az','AzSK')
 
 foreach($m in $Modules){
@@ -33,7 +34,8 @@ foreach($m in $Modules){
 		}
 	}
 }
-$ErrorActionPreference= 'stop'
+$ErrorActionPreference= 'Stop'
+$WarningPreference = 'Stop'
 
 #CONNECT TO TENANT AND AZURE AD
 Connect-AzAccount
