@@ -84,6 +84,4 @@ Stop-Process -Name explorer -Force
 #OPEN FOLDER PATH FOR ASKLOGS
 Start-Process "$env:LOCALAPPDATA\Microsoft\AzSKLogs"
 
-Exit
-
 #Copy-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs" -Destination $azskPath -Recurse
