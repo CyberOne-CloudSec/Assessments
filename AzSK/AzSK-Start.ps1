@@ -40,7 +40,9 @@ $path = 'C:\BPA'
 $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
 $mainPath = $path+'-'+$date+'\'
-$azskPath = $mainPath+"AzSK"
+$clonePath = $mainPath+'GitHubRepo\'
+$azskPath = $clonePath+"AzSK"
+$outPath = $azskPath+'\Report\'
 
 # List files in the Documents folder
 Get-AzSubscription | Export-Csv -Path "$azskPath\subscriptions.csv" -NoTypeInformation
@@ -67,8 +69,8 @@ foreach ($j in $ResourceGroups){
 }
 
 #CLEANUP FILES
-$subscriptionsFile = Join-Path -Path $env:USERPROFILE -ChildPath "Documents\subscriptions.csv"
-$resourceGroupsFile = Join-Path -Path $env:USERPROFILE -ChildPath "Documents\resourcegroups.csv"
+$subscriptionsFile = "$azskPath\subscriptions.csv"
+$resourceGroupsFile = "$azskPath\resourcegroups.csv"
 
 if (Test-Path -Path $subscriptionsFile) {
     Remove-Item -Path $subscriptionsFile -Force
