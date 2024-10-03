@@ -34,13 +34,19 @@ Connect-AzAccount
 
 #CAPTURE SUBSCRIPTIONS
 write-host "CAPTURE SUBSCRIPTIONS" -f yellow
-Get-AzSubscription | Export-Csv -Path '$env:USERPROFILE\Documents\subscriptions.csv'
-$Subs = Import-Csv -Path '$env:USERPROFILE\Documents\subscriptions.csv'
 
-#CAPTURE RESROUCE GROUPS
-write-host "CAPTURE RESOURCE GROUPS" -f yellow
-Get-AzResourceGroup | select ResourceGroupName | Export-Csv -Path '$env:USERPROFILE\Documents\resourcegroups.csv'
-$ResourceGroups = Import-Csv -Path '$env:USERPROFILE\Documents\resourcegroups.csv'
+# Get the path to the Documents folder
+$documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
+
+# List files in the Documents folder
+Get-AzSubscription | Export-Csv -Path "$documentsPath\subscriptions.csv" -NoTypeInformation
+$Subs = Import-Csv -Path "$documentsPath\subscriptions.csv"
+
+# CAPTURE RESOURCE GROUPS
+Write-Host "CAPTURE RESOURCE GROUPS" -ForegroundColor Yellow
+Get-AzResourceGroup | Select-Object ResourceGroupName | Export-Csv -Path "$documentsPath\resourcegroups.csv" -NoTypeInformation
+$ResourceGroups = Import-Csv -Path "$documentsPath\resourcegroups.csv"
+
 
 #SUBSCRIPTION SECURITY STATUS
 write-host "RUN SUBSCRIPTION SECURITY STATUS" -f yellow
