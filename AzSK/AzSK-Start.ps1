@@ -1,3 +1,5 @@
+param ($tenantId,$defaultSubId,$azskPath,$clonePath)
+
 write-host "RUNNING SCRIPT - AZURE SECURE DEVOPS KIT`n" -f CYAN
 write-host "CHECKING MODULES" -f yellow
 
@@ -56,7 +58,7 @@ Ensure-AzModule
 # Ensure AzSK module is installed
 Ensure-AzSKModule
 
-#CREATE DIRECTORY FOLDERS
+<#CREATE DIRECTORY FOLDERS
 $documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
 $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
@@ -67,6 +69,7 @@ $azskPath = $clonePath+"AzSK"
 $tenantId = $(Write-Host "Enter Tenant Id: " -f yellow -NoNewLine; Read-Host)
 $defaultSubId = $(Write-Host "Enter Default Subscription Id: " -f yellow -NoNewLine; Read-Host)
 Update-AzConfig -DefaultSubscriptionForLogin $defaultSubId
+#>
 Connect-AzAccount -TenantId $tenantId
 
 #CAPTURE SUBSCRIPTIONS
@@ -101,4 +104,4 @@ Remove-Item -Path "$azskPath\AzSK-Start.ps1" -Force
 
 $ErrorActionPreference= 'Continue'
 
-ii $azskPath; ii $outPath
+ii $clonePath
