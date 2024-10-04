@@ -50,7 +50,7 @@ foreach ($file in $files) {
 
 #RUN M365SAT
 Set-Location $m365Path
-.\M365SATTester.ps1 $outPath $userPrincipalName $services
+#.\M365SATTester.ps1 $outPath $userPrincipalName $services
 
 #CLEAN UP
 Remove-Item -Path $m365Path -Recurse -Force
