@@ -30,10 +30,28 @@ function Ensure-AzModule {
 
 # Function to ensure AzSK is installed
 function Ensure-AzSKModule {
-    Write-Host "Installing AzSK module..." -ForegroundColor Yellow
-    Install-Module -Name 'AzSK' -Scope CurrentUser -AllowClobber -SkipPublisherCheck -Force
-    Write-Host "[+] AzSK module installed." -ForegroundColor Green
+    Write-Host "Checking if AzSK module is installed..." -ForegroundColor Yellow
+    
+    # Check if AzSK is already installed
+    $azskModule = Get-Module -ListAvailable -Name 'AzSK'
+
+    if (-not $azskModule) {
+        Write-Host "AzSK module not found. Attempting to install..." -ForegroundColor Yellow
+
+        # Install the AzSK module and suppress warnings
+        try {
+            Install-Module -Name 'AzSK' -Scope CurrentUser -AllowClobber -SkipPublisherCheck -Force -ErrorAction Stop
+            Write-Host "[+] AzSK module installed successfully." -ForegroundColor Green
+        } catch {
+            Write-Host "[!] Error installing AzSK module: $_" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "[+] AzSK module is already installed." -ForegroundColor Green
+    }
 }
+
+# Call the function to ensure AzSK is installed
+Ensure-AzSKModule
 
 # Ensure Az module is installed and imported
 Ensure-AzModule
