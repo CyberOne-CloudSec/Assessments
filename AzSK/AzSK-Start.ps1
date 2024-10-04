@@ -2,8 +2,6 @@ write-host "RUNNING SCRIPT - AZURE SECURE DEVOPS KIT`n" -f CYAN
 write-host "CHECKING MODULES" -f yellow
 
 # Suppress warnings
-$originalWarningPreference = $WarningPreference
-$WarningPreference = 'SilentlyContinue'
 $ErrorActionPreference = 'SilentlyContinue'
 
 # Define the module names
@@ -22,8 +20,8 @@ function Ensure-AzModule {
         } else {
             Write-Host "Az module is installed but not imported. Importing now..." -ForegroundColor Yellow
         }
-        # Import the Az module
-        Import-Module -Name 'Az' -ErrorAction Stop
+        # Import the Az module with name checking disabled
+        Import-Module -Name 'Az' -DisableNameChecking -ErrorAction Stop
         Write-Host "[+] Az module imported successfully." -ForegroundColor Green
     } else {
         Write-Host "Az module is already imported." -ForegroundColor Green
@@ -42,9 +40,6 @@ Ensure-AzModule
 
 # Ensure AzSK module is installed
 Ensure-AzSKModule
-
-# Restore original warning preference
-$WarningPreference = $originalWarningPreference
 
 #CREATE DIRECTORY FOLDERS
 $documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
@@ -89,4 +84,4 @@ Remove-Item -Path "$azskPath\AzSK-Start.ps1" -Force
 
 $ErrorActionPreference= 'Continue'
 
-ii $azskPath; ii $outPath; Exit
+ii $azskPath; ii $outPath
