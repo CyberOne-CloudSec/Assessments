@@ -1,96 +1,93 @@
-#CHECK IF MODULES EXISTS
-write-host "RUNNING AZSK SCRIPT`n" -f CYAN
+write-host "RUNNING SCRIPT - AZURE SECURE DEVOPS KIT`n" -f CYAN
 write-host "CHECKING MODULES" -f yellow
 
 $ErrorActionPreference= 'SilentlyContinue'
-$Modules = @('Az','AzSK')
 
-foreach($m in $Modules){
-	if($m -eq 'Az'){
-		$name = 'Az*'
-		$module = Get-Module -ListAvailable | where-Object {$_.Name -like $name} | select name
-			
-		if($module.name -ne $null){
-			write-host "[+] $m installed" -Foreground green
-			Import-Module -Name $m
-		}
-		else{
-			write-host "Installing module: $m" -Foreground yellow
-			Install-Module -Name $m -Scope CurrentUser -Force -AllowClobber
-   			Import-Module -Name $m
-		}
-	}
-	else{
-		$module = Get-Module -Name $m -ListAvailable | select name
-			
-		if($module.name -ne $null){
-			write-host "[+] $m installed" -Foreground green
-			Import-Module -Name $m
-		}
-		else{
-			write-host "Installing module: $m" -Foreground yellow
-			Install-Module $m -SkipPublisherCheck -Scope CurrentUser -AllowClobber -Force
-   			Import-Module -Name $m
-		}
-	}
+#Install-Module -Name azsk -Scope CurrentUser -AllowClobber -SkipPublisherCheck -Force
+
+# Define the module names
+$modules = @('Az', 'AzSK')
+
+# Function to ensure the Az module is imported or installed
+function Ensure-AzModule {
+    # Check if the Az module is imported
+    if (-not (Get-Module -Name 'Az.*')) {
+        # If not imported, check if it is installed
+        if (-not (Get-Module -ListAvailable -Name 'Az.*')) {
+            # Install the Az module if not found
+            Write-Host "Az module is not installed. Installing now..." -ForegroundColor Yellow
+            Install-Module -Name 'Az' -Scope CurrentUser -AllowClobber -Force
+            Write-Host "[+] Az module installed." -ForegroundColor Green
+        } else {
+            Write-Host "Az module is installed but not imported. Importing now..." -ForegroundColor Yellow
+        }
+        # Import the Az module
+        Import-Module -Name 'Az' -ErrorAction Stop
+        Write-Host "[+] Az module imported successfully." -ForegroundColor Green
+    } else {
+        Write-Host "Az module is already imported." -ForegroundColor Green
+    }
 }
-$ErrorActionPreference= 'Stop'
 
-#CONNECT TO TENANT AND AZURE AD
-Connect-AzAccount
+# Function to ensure AzSK is installed
+function Ensure-AzSKModule {
+    Write-Host "Installing AzSK module..." -ForegroundColor Yellow
+    Install-Module -Name 'AzSK' -Scope CurrentUser -AllowClobber -SkipPublisherCheck -Force
+    Write-Host "[+] AzSK module installed." -ForegroundColor Green
+}
 
-#CAPTURE SUBSCRIPTIONS
-write-host "CAPTURE SUBSCRIPTIONS" -f yellow
+# Ensure Az module is installed and imported
+Ensure-AzModule
+
+# Ensure AzSK module is installed
+Ensure-AzSKModule
 
 #CREATE DIRECTORY FOLDERS
-$path = 'C:\BPA'
+$path = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
 $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
-$mainPath = $path+'-'+$date+'\'
-$clonePath = $mainPath+'GitHubRepo\'
+$clonePath = $path+'\BPA-'+$date+'\'
 $azskPath = $clonePath+"AzSK"
-$outPath = $azskPath+'\Report\'
+$outPath = $clonePath+"M365-SAT"
 
-# List files in the Documents folder
-Get-AzSubscription | Export-Csv -Path "$azskPath\subscriptions.csv" -NoTypeInformation
-$Subs = Import-Csv -Path "$azskPath\subscriptions.csv"
+#CONNECT TO TENANT AND AZURE AD
+$tenantId = $(Write-Host "Enter Tenant Id: " -f yellow -NoNewLine; Read-Host)
+Connect-AzAccount -TenantId $tenantId
 
-# CAPTURE RESOURCE GROUPS
-Write-Host "CAPTURE RESOURCE GROUPS" -ForegroundColor Yellow
-Get-AzResourceGroup | Select-Object ResourceGroupName | Export-Csv -Path "$azskPath\resourcegroups.csv" -NoTypeInformation
-$ResourceGroups = Import-Csv -Path "$azskPath\resourcegroups.csv"
+#CAPTURE SUBSCRIPTIONS
+write-host "CAPTURING SUBSCRIPTIONS & RESOURCE GROUPS" -f yellow
+$subIds = Get-AzSubscription | Select-Object id
 
 #SUBSCRIPTION SECURITY STATUS
 write-host "RUN SUBSCRIPTION SECURITY STATUS" -f yellow
-Foreach ($i in $Subs){
-    $Sub = $i.Id
-    Get-AzSKSubscriptionSecurityStatus -SubscriptionId $Sub
+Foreach ($i in $subIds){
+    $sub = $i.Id
+    
+    Set-AzContext -SubscriptionId $sub
+    Get-AzSKSubscriptionSecurityStatus -SubscriptionId $sub
+
+    $resourceGroups = Get-AzResourceGroup | Select-Object ResourceGroupName
+
+    foreach ($j in $resourceGroups){
+        $rg = $j.ResourceGroupName       
+        
+        Get-AzSKAzureServicesSecurityStatus `
+            -SubscriptionId $sub `
+            -ResourceGroupNames $rg
+    }
 }
 
-#SERVICES SECURITY STATUS PER RESOURCE GROUPS
-foreach ($j in $ResourceGroups){
-    $Groups = $j.ResourceGroupName
-    Get-AzSKAzureServicesSecurityStatus `
-        -SubscriptionId $Sub `
-        -ResourceGroupNames $Groups
-}
-
-#CLEANUP FILES
-$subscriptionsFile = "$azskPath\subscriptions.csv"
-$resourceGroupsFile = "$azskPath\resourcegroups.csv"
-
-if (Test-Path -Path $subscriptionsFile) {
-    Remove-Item -Path $subscriptionsFile -Force
-}
-
-if (Test-Path -Path $resourceGroupsFile) {
-    Remove-Item -Path $resourceGroupsFile -Force
-}
+Copy-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs" -Destination $azskPath -Recurse
 
 #CLOSE ALL EXPLORER WINDOWS
 Stop-Process -Name explorer -Force
 
-#OPEN FOLDER PATH FOR ASKLOGS
-Start-Process "$env:LOCALAPPDATA\Microsoft\AzSKLogs"
+#CLEAN UP
+Remove-Item -Path "$azskPath\AzSK-Start.ps1" -Force
 
-#Copy-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs" -Destination $azskPath -Recurse
+$ErrorActionPreference= 'Continue'
+
+ii $azskPath
+ii $outPath
+
+Exit
