@@ -24,7 +24,7 @@ function Ensure-AzModule {
         Import-Module -Name 'Az' -DisableNameChecking -ErrorAction Stop
         Write-Host "[+] Az module imported successfully." -ForegroundColor Green
     } else {
-        Write-Host "Az module is already imported." -ForegroundColor Green
+        Write-Host "[+] Az module is already imported." -ForegroundColor Green
     }
 }
 
@@ -49,9 +49,6 @@ function Ensure-AzSKModule {
         Write-Host "[+] AzSK module is already installed." -ForegroundColor Green
     }
 }
-
-# Call the function to ensure AzSK is installed
-Ensure-AzSKModule
 
 # Ensure Az module is installed and imported
 Ensure-AzModule
