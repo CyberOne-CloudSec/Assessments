@@ -1,26 +1,27 @@
 #RUN SCRIPT ON POWERSHELL 5.1
 
-#$path = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads"
-#powershell -ExecutionPolicy Bypass -File "$path\start.ps1"
+#$downloadsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads"; powershell -ExecutionPolicy Bypass -File "$downloadsPath\start.ps1"
 
 #INSTALL GIT WINGET
 $ErrorActionPreference = 'SilentlyContinue'
+$downloadsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads"
 $gitInstalled = git --version
 
 if($gitInstalled -eq $null){
     write-host "Installing Git" -Foreground yellow
     winget install --id Git.Git -e --source winget
 
-    Start-Process powershell -Verb RunAs; Exit
+    $command = "Set-Location `"$downloadsPath`"; & `".\start.ps1`""
+    Start-Process powershell.exe -ArgumentList '-NoProfile', '-NoExit', '-Command', $command -Verb RunAs; Exit
 }
 
 $userPrincipalName = $(Write-Host "Enter User Name: " -f yellow -NoNewLine; Read-Host)
 
 #CREATE DIRECTORY FOLDERS
-$path = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
+$documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
 $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
-$clonePath = $path+'\BPA-'+$date+'\'
+$clonePath = $documentsPath+'\BPA-'+$date+'\'
 $azskPath = $clonePath+"AzSK"
 $m365Path = $clonePath+"M365SAT"
 $outPath = $clonePath+"M365-SAT"
