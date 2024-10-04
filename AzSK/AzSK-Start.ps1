@@ -1,9 +1,10 @@
 write-host "RUNNING SCRIPT - AZURE SECURE DEVOPS KIT`n" -f CYAN
 write-host "CHECKING MODULES" -f yellow
 
-$ErrorActionPreference= 'SilentlyContinue'
-
-#Install-Module -Name azsk -Scope CurrentUser -AllowClobber -SkipPublisherCheck -Force
+# Suppress warnings
+$originalWarningPreference = $WarningPreference
+$WarningPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'SilentlyContinue'
 
 # Define the module names
 $modules = @('Az', 'AzSK')
@@ -41,6 +42,9 @@ Ensure-AzModule
 
 # Ensure AzSK module is installed
 Ensure-AzSKModule
+
+# Restore original warning preference
+$WarningPreference = $originalWarningPreference
 
 #CREATE DIRECTORY FOLDERS
 $documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
