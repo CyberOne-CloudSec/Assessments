@@ -43,10 +43,10 @@ Ensure-AzModule
 Ensure-AzSKModule
 
 #CREATE DIRECTORY FOLDERS
-$path = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
+$documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
 $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
-$clonePath = $path+'\BPA-'+$date+'\'
+$clonePath = $documentsPath+'\BPA-'+$date+'\'
 $azskPath = $clonePath+"AzSK"
 $outPath = $clonePath+"M365-SAT"
 
@@ -87,7 +87,4 @@ Remove-Item -Path "$azskPath\AzSK-Start.ps1" -Force
 
 $ErrorActionPreference= 'Continue'
 
-ii $azskPath
-ii $outPath
-
-Exit
+ii $azskPath; ii $outPath; Exit
