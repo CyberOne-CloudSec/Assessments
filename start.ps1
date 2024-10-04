@@ -15,6 +15,7 @@ if($gitInstalled -eq $null){
     Start-Process powershell.exe -ArgumentList '-NoProfile', '-NoExit', '-Command', $command -Verb RunAs; Exit
 }
 
+write-host "RUNNING SCRIPT - M365SAT`n" -f CYAN
 $userPrincipalName = $(Write-Host "Enter User Name: " -f yellow -NoNewLine; Read-Host)
 
 #CREATE DIRECTORY FOLDERS
