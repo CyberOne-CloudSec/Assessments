@@ -63,8 +63,10 @@ $date = $getDate -replace '/','.'
 $clonePath = $documentsPath+'\BPA-'+$date+'\'
 $azskPath = $clonePath+"AzSK"
 
-#CONNECT TO TENANT AND AZURE AD
+#CONNECT TO TENANT
 $tenantId = $(Write-Host "Enter Tenant Id: " -f yellow -NoNewLine; Read-Host)
+$defaultSubId = $(Write-Host "Enter Default Subscription Id: " -f yellow -NoNewLine; Read-Host)
+Update-AzConfig -DefaultSubscriptionForLogin $defaultSubId
 Connect-AzAccount -TenantId $tenantId
 
 #CAPTURE SUBSCRIPTIONS
