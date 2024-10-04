@@ -52,18 +52,16 @@ $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
 $clonePath = $documentsPath+'\BPA-'+$date+'\'
 $azskPath = $clonePath+"AzSK"
-$outPath = $clonePath+"M365-SAT"
 
 #CONNECT TO TENANT AND AZURE AD
 $tenantId = $(Write-Host "Enter Tenant Id: " -f yellow -NoNewLine; Read-Host)
 Connect-AzAccount -TenantId $tenantId
 
 #CAPTURE SUBSCRIPTIONS
-write-host "CAPTURING SUBSCRIPTIONS & RESOURCE GROUPS" -f yellow
 $subIds = Get-AzSubscription | Select-Object id
 
 #SUBSCRIPTION SECURITY STATUS
-write-host "RUN SUBSCRIPTION SECURITY STATUS" -f yellow
+write-host "RUNNING SUBSCRIPTION SECURITY STATUS" -f yellow
 Foreach ($i in $subIds){
     $sub = $i.Id
     
