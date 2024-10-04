@@ -17,6 +17,9 @@ if($gitInstalled -eq $null){
 
 write-host "RUNNING SCRIPT - M365SAT`n" -f CYAN
 $userPrincipalName = $(Write-Host "Enter User Name: " -f yellow -NoNewLine; Read-Host)
+$tenantId = $(Write-Host "Enter Tenant Id: " -f yellow -NoNewLine; Read-Host)
+$defaultSubId = $(Write-Host "Enter Default Subscription Id: " -f yellow -NoNewLine; Read-Host)
+Update-AzConfig -DefaultSubscriptionForLogin $defaultSubId
 
 #CREATE DIRECTORY FOLDERS
 $documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
@@ -24,7 +27,7 @@ $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
 $clonePath = $documentsPath+'\BPA-'+$date+'\'
 $azskPath = $clonePath+"AzSK"
-$m365Path = $clonePath+"M365SAT"
+$m365satPath = $clonePath+"M365SAT"
 $outPath = $clonePath+"M365-SAT"
 
 
@@ -57,6 +60,6 @@ $ErrorActionPreference = 'Continue'
 
 #SECURE DEVOPS KIT (AZSK)
 
-$command = "Set-Location `"$azskPath`"; & `".\AzSK-Start.ps1`""
+$command = "Set-Location `"$azskPath`"; & `".\AzSK-Start.ps1`" -TenantId `"$tenantId`" -DefaultSubId `"$defaultSubId`" -ClonePath `"$clonePath`"" 
 
 Start-Process powershell.exe -ArgumentList '-NoProfile', '-NoExit', '-Command', $command -Verb RunAs; Exit
