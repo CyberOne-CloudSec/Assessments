@@ -1,20 +1,30 @@
 #RUN SCRIPT ON POWERSHELL 5.1
 
+#$path = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads"
+#powershell -ExecutionPolicy Bypass -File "$path\start.ps1"
+
+#INSTALL GIT WINGET
+$ErrorActionPreference = 'SilentlyContinue'
+$gitInstalled = git --version
+
+if($gitInstalled -eq $null){
+    write-host "Installing Git" -Foreground yellow
+    winget install --id Git.Git -e --source winget
+
+    Start-Process powershell -Verb RunAs; Exit
+}
+
 $userPrincipalName = $(Write-Host "Enter User Name: " -f yellow -NoNewLine; Read-Host)
-#$tenant = $(Write-Host "Enter Tenant Id: " -f yellow -NoNewLine; Read-Host)
-$fullDomain = ($userPrincipalName -split "@")[1]
-$domain = ($fullDomain -split ".c")[0]
 
 #CREATE DIRECTORY FOLDERS
-$path = 'C:\BPA'
+$path = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
 $getDate = Get-Date -Format 'MM/dd/yyyy'
 $date = $getDate -replace '/','.'
-$mainPath = $path+'-'+$date+'\'
-$gitHubPath = 'GitHubRepo'
-$orgName = $domain.ToUpper()
+$clonePath = $path+'\BPA-'+$date+'\'
+$azskPath = $clonePath+"AzSK"
+$m365Path = $clonePath+"M365SAT"
+$outPath = $clonePath+"M365-SAT"
 
-$clonePath = $mainPath+$gitHubPath
-$outPath = $mainPath+$orgName+'\Report\'
 
 if (Test-Path -Path $clonePath) {
     Remove-Item $clonePath -Recurse -Force
@@ -34,5 +44,17 @@ foreach ($file in $files) {
 }
 
 #RUN M365SAT
-Set-Location "$clonePath\M365SAT\"
+Set-Location $m365Path
 .\M365SATTester.ps1 $outPath $userPrincipalName $services
+
+#CLEAN UP
+Remove-Item -Path $m365Path -Recurse -Force
+Remove-Item -Path "$clonePath\start.ps1" -Force
+
+$ErrorActionPreference = 'Continue'
+
+#SECURE DEVOPS KIT (AZSK)
+
+$command = "Set-Location `"$azskPath`"; & `".\AzSK-Start.ps1`""
+
+Start-Process powershell.exe -ArgumentList '-NoProfile', '-NoExit', '-Command', $command -Verb RunAs; Exit
