@@ -1,6 +1,6 @@
 #RUN SCRIPT ON POWERSHELL 5.1
 
-$downloadsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads"; Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$downloadsPath\start.ps1`"" -Verb RunAs;Exit
+#$downloadsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads"; Start-Process "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$downloadsPath\start.ps1`"" -Verb RunAs
 
 #INSTALL GIT WINGET
 $ErrorActionPreference = 'SilentlyContinue'
