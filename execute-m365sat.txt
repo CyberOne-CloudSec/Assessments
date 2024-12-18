@@ -2,6 +2,8 @@
 
 write-host "RUNNING SCRIPT - M365SAT`n" -f CYAN
 $userPrincipalName = $(Write-Host "Enter Global Admin credentials: " -f yellow -NoNewLine; Read-Host)
+$defaultSubId = $(Write-Host "Enter Default Subscription Id: " -f yellow -NoNewLine; Read-Host)
+Update-AzConfig -DefaultSubscriptionForLogin $defaultSubId
 
 # CREATE DIRECTORY FOLDERS
 $documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
@@ -32,7 +34,9 @@ Set-Location $m365Path
 .\M365SATTester.ps1 $outPath $userPrincipalName
 
 #CLEAN UP
-Remove-Item -Path $azskPath -Recurse -Force
-Remove-Item -Path $m365Path -Recurse -Force
+$executePs1Path = Join-Path -Path $env:USERPROFILE -ChildPath "Downloads\execute-m365sat.ps1"
+Remove-Item -Path $executePs1Path -Recurse -Force
 Remove-Item -Path "$clonePath\start.ps1" -Force
 Remove-Item -Path "$clonePath\execute-m365sat.txt" -Force
+Remove-Item -Path $azskPath -Recurse -Force
+Remove-Item -Path $m365Path -Recurse -Force
