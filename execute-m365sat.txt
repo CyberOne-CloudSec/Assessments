@@ -1,0 +1,36 @@
+write-host "RUNNING SCRIPT - M365SAT`n" -f CYAN
+$userPrincipalName = $(Write-Host "Enter Global Admin credentials: " -f yellow -NoNewLine; Read-Host)
+
+# CREATE DIRECTORY FOLDERS
+$documentsPath = Join-Path -Path $env:USERPROFILE -ChildPath "Documents"
+$date = Get-Date -Format 'MM.dd.yyyy'
+$clonePath = Join-Path -Path $documentsPath -ChildPath "BPA-$date"
+$azskPath = Join-Path -Path $clonePath -ChildPath "AzSK"
+$m365Path = Join-Path -Path $clonePath -ChildPath "M365SAT"
+$outPath = Join-Path -Path $clonePath -ChildPath "M365-SAT"
+
+if (Test-Path -Path $clonePath) {
+    Remove-Item $clonePath -Recurse -Force
+}
+New-Item $clonePath -Type Directory
+git clone https://github.com/CyberOne-CloudSec/Assessments $clonePath
+
+# UNBLOCK FILES
+$files = Get-ChildItem $clonePath -Recurse -File
+foreach ($file in $files) {
+    try {
+        Unblock-File -Path $file.FullName -ErrorAction Stop
+    } catch {
+        Write-Warning "Failed to unblock file: $($_.Exception.Message)"
+    }
+}
+
+#RUN M365SAT
+Set-Location $m365Path
+.\M365SATTester.ps1 $outPath $userPrincipalName
+
+#CLEAN UP
+Remove-Item -Path $azskPath -Recurse -Force
+Remove-Item -Path $m365Path -Recurse -Force
+Remove-Item -Path "$clonePath\start.ps1" -Force
+Remove-Item -Path "$clonePath\execute-m365sat.txt" -Force
