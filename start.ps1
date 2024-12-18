@@ -57,7 +57,7 @@ Set-Location $m365Path
 Remove-Item -Path $m365Path -Recurse -Force
 Remove-Item -Path "$clonePath\start.ps1" -Force
 
-$ErrorActionPreference = 'Continue'
+#$ErrorActionPreference = 'Continue'
 
 #SECURE DEVOPS KIT (AZSK)
 
