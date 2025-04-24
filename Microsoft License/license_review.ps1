@@ -1,6 +1,6 @@
 param ($licenseOutPath)
 
-write-host "RUNNING SCRIPT - MICROSOFT LICENSE REVIEW`n" -f CYAN
+write-host "`nRUNNING SCRIPT - MICROSOFT LICENSE REVIEW" -f CYAN
 
 # Ensure Required Microsoft Graph Modules Are Installed & Imported
 $modules = @(
