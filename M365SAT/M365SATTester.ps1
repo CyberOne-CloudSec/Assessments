@@ -1,14 +1,14 @@
 #Requires -Version 5.1
 #Requires -RunAsAdministrator
 
-param ($outPath,$userPrincipalName)
+param ($m365OutPathReport,$userPrincipalName)
 
 function ExecuteM365SAT
 {
 	Import-Module .\M365SAT.psd1
 
 	Get-M365SATReport `
-		-OutPath $outPath `
+		-OutPath $m365OutPathReport `
 		-Username $userPrincipalName `
 		-reportType "HTML" `
 		-AllowLogging "Warning" `
