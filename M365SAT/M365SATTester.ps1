@@ -17,7 +17,7 @@ function ExecuteM365SAT
 		-LicenseMode All `
 		-LicenseLevel All `
   		-EnvironmentType M365 `
-    		-SkipChecks $true
+    		-SkipChecks
   		#-EnvironmentType AZURE,M365
   
 	Remove-Module M365SAT -Force
