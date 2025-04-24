@@ -1,13 +1,9 @@
 param ($tenantId,$defaultSubId,$azskPath,$clonePath)
 
 write-host "RUNNING SCRIPT - AZURE SECURE DEVOPS KIT`n" -f CYAN
-write-host "CHECKING MODULES" -f yellow
-
-# Suppress warnings
-$ErrorActionPreference = 'SilentlyContinue'
 
 # Define the module names
-$modules = @('Az', 'AzSK')
+$modules = @('AzSK')
 
 # Function to ensure the Az module is imported or installed
 function Ensure-AzModule {
