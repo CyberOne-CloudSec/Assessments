@@ -1,4 +1,4 @@
-#try { git --version } catch { Start-Process winget -ArgumentList "install", "--id", "Git.Git", "-e", "--source", "winget" -Verb RunAs -Wait }; Start-Process powershell -ArgumentList "-Command Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force" -Verb RunAs -Wait; try { Rename-Item -Path "$env:USERPROFILE\Downloads\execute-m365sat.txt" -NewName "execute-m365sat.ps1" -ErrorAction Stop } catch {}; Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$env:USERPROFILE\Downloads\execute-m365sat.ps1`"" -Verb RunAs -Wait; Exit
+#try { git --version } catch { Start-Process winget -ArgumentList "install", "--id", "Git.Git", "-e", "--source", "winget" -Verb RunAs -Wait }; Start-Process powershell -ArgumentList "-Command Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force" -Verb RunAs -Wait; try { Rename-Item -Path "$env:USERPROFILE\Downloads\start-security-script.txt" -NewName "start-security-script.ps1" -ErrorAction Stop } catch {}; Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$env:USERPROFILE\Downloads\start-security-script.ps1`"" -Verb RunAs -Wait; Exit
 
 # Define dynamic OutPath
 $timestamp = (Get-Date).ToString("MM.dd.yyyy_HH.mm.ss")
@@ -32,7 +32,7 @@ $tenantId = $(Write-Host "Enter Tenant Id: " -ForegroundColor Yellow -NoNewLine;
 
 #RUN MICROSOFT LICENSE REVIEW
 Set-Location $licenseOutPath
-.\
+.\license_review.ps1 $licenseOutPath
 
 #RUN M365SAT
 Set-Location $assessmentPath
