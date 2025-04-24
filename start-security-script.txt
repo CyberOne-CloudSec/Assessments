@@ -8,7 +8,7 @@ if (Test-Path -Path $assessmentPath) {Remove-Item $assessmentPath -Recurse -Forc
 New-Item $assessmentPath -Type Directory
 git clone https://github.com/CyberOne-CloudSec/Assessments $assessmentPath
 
-m365OutPathReport = $assessmentPath + "\M365SAT-Report"
+$m365OutPathReport = $assessmentPath + "\M365SAT-Report"
 if (-not (Test-Path -Path $m365OutPathReport)) {New-Item -Path $m365OutPathReport -ItemType Directory | Out-Null}
 
 $azskOutPath = $assessmentPath + "\AzSK"
