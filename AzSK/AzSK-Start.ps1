@@ -1,7 +1,5 @@
 param ($tenantId,$azskOutPath,$assessmentPath)
 
-write-host "`nRUNNING SCRIPT - AZURE SECURE DEVOPS KIT" -f CYAN
-
 # Define the module names
 $modules = @('Az', 'AzSK')
 
