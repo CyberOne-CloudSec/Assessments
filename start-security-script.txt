@@ -8,6 +8,9 @@ if (Test-Path -Path $assessmentPath) {Remove-Item $assessmentPath -Recurse -Forc
 New-Item $assessmentPath -Type Directory
 git clone https://github.com/CyberOne-CloudSec/Assessments $assessmentPath
 
+$m365OutPath = $assessmentPath + "\M365SAT"
+if (-not (Test-Path -Path $m365OutPath)) {New-Item -Path $m365OutPath -ItemType Directory | Out-Null}
+
 $m365OutPathReport = $assessmentPath + "\M365SAT-Report"
 if (-not (Test-Path -Path $m365OutPathReport)) {New-Item -Path $m365OutPathReport -ItemType Directory | Out-Null}
 
@@ -35,8 +38,8 @@ Set-Location $licenseOutPath
 .\license_review.ps1 $licenseOutPath
 
 #RUN M365SAT
-Set-Location $assessmentPath
-.\M365SATTester.ps1 $outPath $userPrincipalName
+Set-Location $m365OutPath
+.\M365SATTester.ps1 $m365OutPathReport $userPrincipalName
 
 #RUN M365SAT
 Set-Location $azskOutPath
