@@ -1,5 +1,7 @@
 param ($licenseOutPath)
 
+write-host "RUNNING SCRIPT - MICROSOFT LICENSE REVIEW`n" -f CYAN
+
 # Ensure Required Microsoft Graph Modules Are Installed & Imported
 $modules = @(
     "Microsoft.Graph.Authentication",
