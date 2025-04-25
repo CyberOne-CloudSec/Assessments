@@ -1,5 +1,13 @@
 write-host "`nRUNNING SCRIPT - MICROSOFT LICENSE REVIEW" -f CYAN
 
+# Check if running as Administrator
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "[!] Please run this script as Administrator." -ForegroundColor Red
+    Write-Host "Press any key to exit..." -ForegroundColor Yellow
+    [void][System.Console]::ReadKey($true)
+    exit
+}
+
 $userPrincipalName = $(Write-Host "Enter Global Admin credentials: " -f yellow -NoNewLine; Read-Host)
 $targetAzAccountsVersion = "2.19.0"
 
