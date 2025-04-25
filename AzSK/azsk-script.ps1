@@ -1,4 +1,4 @@
-param ($tenantId,$azskOutPath,$assessmentPath)
+write-host "`nRUNNING SCRIPT - AZURE SECURE DEVOPS KIT" -f CYAN
 
 # Define the module names
 $modules = @('Az', 'AzSK')
@@ -53,6 +53,8 @@ Ensure-AzModule
 Ensure-AzSKModule
 
 
+# Connect to Az
+$tenantId = $(Write-Host "Enter Tenant Id: " -ForegroundColor Yellow -NoNewLine; Read-Host)
 Connect-AzAccount -TenantId $tenantId
 
 # Capture all subscriptions
@@ -70,14 +72,11 @@ foreach ($sub in $subIds) {
     }
 }
 
-# 1. Copy AzSK logs from local user profile
-Copy-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs" -Destination $azskOutPath -Recurse -Force
+# Copy AzSK logs from local user profile
+Copy-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs" -Destination $PSScriptRoot -Recurse -Force
 
-# 2. Clear the original AzSK log folder
-Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs\*" -Recurse -Force
-
-# 3. Prune any scan folders that don't include a SecurityReport*.csv
-$logsRoot = Join-Path $assessmentPath "AzSK\AzSKLogs"
+# Prune any scan folders that don't include a SecurityReport*.csv
+$logsRoot = Join-Path $PSScriptRoot "\AzSKLogs"
 
 Get-ChildItem -Path $logsRoot -Directory | ForEach-Object {
     $subscriptionPath = $_.FullName
@@ -92,3 +91,4 @@ Get-ChildItem -Path $logsRoot -Directory | ForEach-Object {
         }
     }
 }
+
