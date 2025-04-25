@@ -81,24 +81,48 @@ if (-not $hasAllPerms) {
     }
 }
 
-# Pull license data from Graph
-$licenses = Invoke-MgGraphRequest -Uri "beta/subscribedSkus" -OutputType PSObject | 
-    Select-Object -ExpandProperty value | 
-    Where-Object { $_.CapabilityStatus -eq 'Enabled' -and  ($_.PrepaidUnits.enabled -lt 9998) }
+# Define path to the CSV in the same folder as the script
+$csvPath = Join-Path -Path $PSScriptRoot -ChildPath 'Product names and service plan identifiers for licensing.csv'
+$productList = Import-Csv -Path $csvPath
 
-# Build raw license allocation report
+# Build a mapping: GUID → Product_Display_Name
+$guidMap = @{}
+foreach ($item in $productList) {
+    $guid = $item.GUID
+    if ($guid) {
+        $guidMap[$guid] = $item.Product_Display_Name
+    }
+}
+
+# Pull license data from Microsoft Graph
+$licenses = Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/subscribedSkus" -OutputType PSObject |
+    Select-Object -ExpandProperty value |
+    Where-Object { $_.CapabilityStatus -eq 'Enabled' -and $_.PrepaidUnits.Enabled -lt 9998 }
+
+# Build report
 $licenseOverview = @()
 foreach ($license in $licenses) {
-    $skuPartNumber = $license.skuPartNumber
-    $total = [int]$license.PrepaidUnits.Enabled
-    $used  = [int]$license.ConsumedUnits
+    $skuId = $license.skuId
+    $skuName = $license.skuPartNumber
+    $productName = $null
+
+    # Try matching skuId to GUID → Product_Display_Name
+    if ($guidMap.ContainsKey($skuId)) {
+        $productName = $guidMap[$skuId]
+    }
+    else {
+        $productName = $skuName # fallback
+    }
+
+    $total  = [int]$license.PrepaidUnits.Enabled
+    $used   = [int]$license.ConsumedUnits
     $unused = $total - $used
 
     $licenseOverview += [PSCustomObject]@{
-        "SKU Part Number" = $skuPartNumber
-        "Total"      = $total
-        "Assigned"   = $used
-        "Unused"     = $unused
+        "Product Name"  = $productName
+        "Total"         = $total
+        "Assigned"      = $used
+        "Unused"        = $unused
     }
 }
 
@@ -110,7 +134,3 @@ $licenseOverview | Export-Csv -Path $csvFile -NoTypeInformation
 Disconnect-MgGraph
 
 ii $PSScriptRoot
-
-Write-Host "Press any key to exit..."
-[void][System.Console]::ReadKey($true)
-exit
