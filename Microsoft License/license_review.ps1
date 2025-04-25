@@ -1,5 +1,3 @@
-param ($licenseOutPath)
-
 write-host "`nRUNNING SCRIPT - MICROSOFT LICENSE REVIEW" -f CYAN
 
 # Ensure Required Microsoft Graph Modules Are Installed & Imported
@@ -97,6 +95,5 @@ foreach ($license in $licenses) {
 }
 
 # Export to CSV
-$csvFile = "$licenseOutPath\License_Review.csv"
+$csvFile = "$PSScriptRoot\License_Review.csv"
 $licenseOverview | Export-Csv -Path $csvFile -NoTypeInformation
-
