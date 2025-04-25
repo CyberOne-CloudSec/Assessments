@@ -102,3 +102,9 @@ Get-ChildItem -Path $logsRoot -Directory | ForEach-Object {
         }
     }
 }
+
+ii $logsRoot
+
+Write-Host "Press any key to exit..."
+[void][System.Console]::ReadKey($true)
+exit
