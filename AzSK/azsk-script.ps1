@@ -1,61 +1,69 @@
 write-host "`nRUNNING SCRIPT - AZURE SECURE DEVOPS KIT" -f CYAN
 
-# Define the module names
-$modules = @('Az', 'AzSK')
+# Define the target Az.Accounts version
+$targetAzAccountsVersion = '1.7.1'
 
-# Function to ensure the Az module is imported or installed
+# Ensure 'Az' module (any submodule) is available and importable
 function Ensure-AzModule {
-    # Check if the Az module is imported
-    if (-not (Get-Module -Name 'Az.*')) {
-        # If not imported, check if it is installed
-        if (-not (Get-Module -ListAvailable -Name 'Az.*')) {
-            # Install the Az module if not found
-            Write-Host "Az module is not installed. Installing now..." -ForegroundColor Yellow
-            Install-Module -Name 'Az' -Scope CurrentUser -AllowClobber -Force
-            Write-Host "[+] Az module installed." -ForegroundColor Green
-        } else {
-            Write-Host "Az module is installed but not imported. Importing now..." -ForegroundColor Yellow
-        }
-        # Import the Az module with name checking disabled
-        Import-Module -Name 'Az' -DisableNameChecking -ErrorAction Stop
-        Write-Host "[+] Az module imported successfully." -ForegroundColor Green
+    $azModules = Get-Module -ListAvailable -Name 'Az.*'
+    if (-not $azModules) {
+        Write-Host "[!] Az modules not found. Installing 'Az'..." -ForegroundColor Yellow
+        Install-Module -Name 'Az' -Scope CurrentUser -AllowClobber -Force
     } else {
-        Write-Host "[+] Az module is already imported." -ForegroundColor Green
+        Write-Host "[+] Az modules are already installed." -ForegroundColor Green
     }
 }
 
-# Function to ensure AzSK is installed
+# Ensure 'AzSK' module is available and importable
 function Ensure-AzSKModule {
-    Write-Host "Checking if AzSK module is installed..." -ForegroundColor Yellow
-    
-    # Check if AzSK is already installed
-    $azskModule = Get-Module -ListAvailable -Name 'AzSK'
-
-    if (-not $azskModule) {
-        Write-Host "AzSK module not found. Attempting to install..." -ForegroundColor Yellow
-
-        # Install the AzSK module and suppress warnings
-        try {
-            Install-Module -Name 'AzSK' -Scope CurrentUser -AllowClobber -SkipPublisherCheck -Force -ErrorAction Stop
-            Write-Host "[+] AzSK module installed successfully." -ForegroundColor Green
-        } catch {
-            Write-Host "[!] Error installing AzSK module: $_" -ForegroundColor Red
-        }
+    $azModules = Get-Module -ListAvailable -Name 'AzSk'
+    if (-not $azModules) {
+        Write-Host "[!] AzSK modules not found - installing now..." -ForegroundColor Yellow
+        Install-Module -Name 'AzSK' -Scope CurrentUser -AllowClobber -SkipPublisherCheck -Force -ErrorAction Stop
     } else {
-        Write-Host "[+] AzSK module is already installed." -ForegroundColor Green
+        Write-Host "[+] AzSK modules are already installed." -ForegroundColor Green
+    }
+
+    try {
+        Import-Module AzSK -ErrorAction Stop
+        Write-Host "[+] AzSK module imported successfully." -ForegroundColor Green
+    } catch {
+        Write-Host "[!] Failed to import AzSK: $_" -ForegroundColor Red
     }
 }
 
-# Ensure Az module is installed and imported
-Ensure-AzModule
+# Remove all Az.Accounts versions except target
+function Enforce-AzAccountsVersion {
+    Write-Host "[~] Checking for Az.Accounts versions..." -ForegroundColor Yellow
+    Get-Module -Name 'Az.Accounts' -ListAvailable -ErrorAction SilentlyContinue |
+    Where-Object { $_.Version -ne [version]$targetAzAccountsVersion } |
+    ForEach-Object {
+        Write-Host "[-] Uninstalling Az.Accounts version $($_.Version)..." -ForegroundColor Yellow
+        Uninstall-Module -Name $_.Name -RequiredVersion $_.Version -Force -ErrorAction SilentlyContinue
+    }
 
-# Ensure AzSK module is installed
+    $existingTarget = Get-Module -Name 'Az.Accounts' -ListAvailable |
+                      Where-Object { $_.Version -eq [version]$targetAzAccountsVersion }
+
+    if (-not $existingTarget) {
+        Write-Host "[+] Installing Az.Accounts $targetAzAccountsVersion..." -ForegroundColor Yellow
+        Install-Module -Name 'Az.Accounts' -RequiredVersion $targetAzAccountsVersion -Scope CurrentUser -Force -AllowClobber
+    } else {
+        Write-Host "[+] Az.Accounts $targetAzAccountsVersion already installed." -ForegroundColor Green
+    }
+}
+
+# Execute logic
+Ensure-AzModule
 Ensure-AzSKModule
+Enforce-AzAccountsVersion
 
 
 # Connect to Az
 $tenantId = $(Write-Host "Enter Tenant Id: " -ForegroundColor Yellow -NoNewLine; Read-Host)
-Connect-AzAccount -TenantId $tenantId
+$defaultSubId = $(Write-Host "Enter Default Subscription Id: " -ForegroundColor Yellow -NoNewLine; Read-Host)
+
+Connect-AzAccount -TenantId $tenantId -Subscription $defaultSubId
 
 # Capture all subscriptions
 $subIds = Get-AzSubscription | Select-Object -ExpandProperty Id
@@ -72,10 +80,13 @@ foreach ($sub in $subIds) {
     }
 }
 
-# Copy AzSK logs from local user profile
+# 1. Copy AzSK logs from local user profile
 Copy-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs" -Destination $PSScriptRoot -Recurse -Force
 
-# Prune any scan folders that don't include a SecurityReport*.csv
+# 2. Clear the original AzSK log folder
+Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\AzSKLogs\*" -Recurse -Force
+
+# 3. Prune any scan folders that don't include a SecurityReport*.csv
 $logsRoot = Join-Path $PSScriptRoot "\AzSKLogs"
 
 Get-ChildItem -Path $logsRoot -Directory | ForEach-Object {
@@ -91,4 +102,3 @@ Get-ChildItem -Path $logsRoot -Directory | ForEach-Object {
         }
     }
 }
-
