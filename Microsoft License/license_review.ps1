@@ -97,3 +97,12 @@ foreach ($license in $licenses) {
 # Export to CSV
 $csvFile = "$PSScriptRoot\License_Review.csv"
 $licenseOverview | Export-Csv -Path $csvFile -NoTypeInformation
+
+# Disconnect
+Disconnect-MgGraph
+
+ii $PSScriptRoot
+
+Write-Host "Press any key to exit..."
+[void][System.Console]::ReadKey($true)
+exit
