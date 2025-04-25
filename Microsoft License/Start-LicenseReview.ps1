@@ -1,5 +1,13 @@
 write-host "`nRUNNING SCRIPT - MICROSOFT LICENSE REVIEW" -f CYAN
 
+# Check if running as Administrator
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "[!] Please run this script as Administrator." -ForegroundColor Red
+    Write-Host "Press any key to exit..." -ForegroundColor Yellow
+    [void][System.Console]::ReadKey($true)
+    exit
+}
+
 # Ensure Required Microsoft Graph Modules Are Installed & Imported
 $modules = @(
     "Microsoft.Graph.Authentication",
