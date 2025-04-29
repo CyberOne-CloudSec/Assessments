@@ -88,8 +88,3 @@ Connect-MgGraph -ContextScope Process -Scope $scope
 .\M365SATTester.ps1 $m365OutPathReport $userPrincipalName
 
 ii $m365OutPathReport
-
-Write-Host "Press any key to exit..."
-[void][System.Console]::ReadKey($true)
-exit
-
