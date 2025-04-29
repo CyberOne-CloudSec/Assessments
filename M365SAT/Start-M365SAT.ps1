@@ -82,7 +82,7 @@ $scope = @(
     "AuditLog.Read.All"
     )
 
-Connect-MgGraph -ContextScope Process -Scope $scope
+#Connect-MgGraph -ContextScope Process -Scope $scope
 
 # Run M365SAT
 .\M365SATTester.ps1 $m365OutPathReport $userPrincipalName
