@@ -62,6 +62,28 @@ foreach ($module in $modules) {
     }
 }
 
+# Connect Microsoft Graph
+$scope = @(
+    "Directory.Read.All", 
+    "RoleManagement.Read.Directory", 
+    "DeviceManagementServiceConfig.Read.All",
+    "DeviceManagementConfiguration.Read.All", 
+    "User.Read.All", 
+    "Policy.Read.All",
+    "DeviceManagementManagedDevices.Read.All", 
+    "DeviceManagementApps.Read.All", 
+    "Group.Read.All",
+    "UserAuthenticationMethod.Read.All", 
+    "GroupMember.Read.All", 
+    "Organization.Read.All",
+    "Domain.Read.All", 
+    "AccessReview.Read.All", 
+    "SecurityEvents.Read.All", 
+    "AuditLog.Read.All"
+    )
+
+Connect-MgGraph -ContextScope Process -Scope $scope
+
 # Run M365SAT
 .\M365SATTester.ps1 $m365OutPathReport $userPrincipalName
 
