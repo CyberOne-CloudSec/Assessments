@@ -1,74 +1,19 @@
-function Invoke-MicrosoftTeamsCredentials($Credential)
-{
-	try
-	{
-		Write-Host "Connecting to Microsoft Teams Powershell..."
-		$Team = Connect-MicrosoftTeams -Credential $Credential -ErrorAction Stop
-		if (-not [string]::IsNullOrEmpty($Team))
-		{
-			Write-Host "Connected to Microsoft Teams Powershell!" -ForegroundColor DarkYellow -BackgroundColor Black
+function Connect-M365SATTeamsDeviceCode {
+	try {
+		Write-Host "Connecting to Microsoft Teams PowerShell using device code..."
+		$Team = Connect-MicrosoftTeams -UseDeviceAuthentication -ErrorAction Stop
+		if ($Team) {
+			Write-Host "Connected to Microsoft Teams PowerShell." -ForegroundColor DarkYellow -BackgroundColor Black
 			return $true
 		}
-		else
-		{
-			Write-ErrorLog 'Failed to Connect to Microsoft Teams Powershell' -ErrorRecord $_
-			return $false
-		}
+		throw "Teams connection was not created."
 	}
-	catch
-	{
-		Write-ErrorLog 'Failed to Connect to Microsoft Teams Powershell' -ErrorRecord $_
+	catch {
+		Write-Error "Failed to connect to Microsoft Teams PowerShell. $($_.Exception.Message)"
 		return $false
 	}
-	
 }
 
-function Invoke-MicrosoftTeamsUsername($Username)
-{
-	try
-	{
-		Write-Host "Connecting to Microsoft Teams Powershell..."
-		$Team = Connect-MicrosoftTeams -ErrorAction Stop
-		if (-not [string]::IsNullOrEmpty($Team))
-		{
-			Write-Host "Connected to Microsoft Teams Powershell!" -ForegroundColor DarkYellow -BackgroundColor Black
-			return $true
-		}
-		else
-		{
-			Write-ErrorLog 'Failed to Connect to Microsoft Teams Powershell' -ErrorRecord $_
-			return $false
-		}
-	}
-	catch
-	{
-		Write-ErrorLog 'Failed to Connect to Microsoft Teams Powershell' -ErrorRecord $_
-		return $false
-	}
-	
-}
-
-function Invoke-MicrosoftTeamsLite
-{
-	try
-	{
-		Write-Host "Connecting to Microsoft Teams Powershell..."
-		$Team = Connect-MicrosoftTeams -ErrorAction Stop
-		if (-not [string]::IsNullOrEmpty($Team))
-		{
-			Write-Host "Connected to Microsoft Teams Powershell!" -ForegroundColor DarkYellow -BackgroundColor Black
-			return $true
-		}
-		else
-		{
-			Write-ErrorLog 'Failed to Connect to Microsoft Teams Powershell' -ErrorRecord $_
-			return $false
-		}
-	}
-	catch
-	{
-		Write-ErrorLog 'Failed to Connect to Microsoft Teams Powershell' -ErrorRecord $_
-		return $false
-	}
-	
-}
+function Invoke-MicrosoftTeamsCredentials($Credential) { return Connect-M365SATTeamsDeviceCode }
+function Invoke-MicrosoftTeamsUsername($Username) { return Connect-M365SATTeamsDeviceCode }
+function Invoke-MicrosoftTeamsLite { return Connect-M365SATTeamsDeviceCode }
