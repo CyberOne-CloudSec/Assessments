@@ -1,43 +1,36 @@
-#Requires -Version 5.1
+#Requires -Version 7.0
 #Requires -RunAsAdministrator
 
-param ($m365OutPathReport,$userPrincipalName)
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$m365OutPathReport,
+    [Parameter(Mandatory = $true)]
+    [string]$userPrincipalName,
+    [string[]]$ModulesToRun = @("Office365", "Exchange", "Teams", "Azure")
+)
 
-function ExecuteM365SAT
-{
-	Import-Module .\M365SAT.psd1
+function ExecuteM365SAT {
+    Import-Module .\M365SAT.psd1 -Force
 
-	Get-M365SATReport `
-		-OutPath $m365OutPathReport `
-		-Username $userPrincipalName `
-		-reportType "HTML" `
-		-AllowLogging "Warning" `
-		-Modules All `
-		-BenchmarkVersion LATEST `
-		-LicenseMode All `
-		-LicenseLevel All `
-  		-EnvironmentType M365 `
-    		-SkipChecks
-  		#-EnvironmentType AZURE,M365
-  
-	Remove-Module M365SAT -Force
+    Get-M365SATReport `
+        -OutPath $m365OutPathReport `
+        -Username $userPrincipalName `
+        -reportType "HTML" `
+        -AllowLogging "Warning" `
+        -Modules $ModulesToRun `
+        -BenchmarkVersion LATEST `
+        -LicenseMode All `
+        -LicenseLevel All `
+        -EnvironmentType M365 `
+        -SkipChecks `
+        -SkipLogin
+
+    Remove-Module M365SAT -Force -ErrorAction SilentlyContinue
 }
 
-
-function CheckAdminPrivBeta
-{
-	# Check if script is running as Adminstrator and if not use RunAs
-	Write-Host "[...] Checking if the script is running as Administrator"
-	$IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-	if (-not $IsAdmin)
-	{
-		Write-Warning "[!] Program needs Administrator Rights! Trying to Elevate to Admin..."
-		Start-Process powershell -Verb runas -ArgumentList "-NoExit -c cd '$pwd'; .\M365SATTester.ps1"
-	}
-	else
-	{
-		Write-Host "[+] The script is running as Administrator..." -ForegroundColor Green
-		ExecuteM365SAT
-	}
+$IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $IsAdmin) {
+    throw "Run this script as Administrator."
 }
-CheckAdminPrivBeta
+
+ExecuteM365SAT
