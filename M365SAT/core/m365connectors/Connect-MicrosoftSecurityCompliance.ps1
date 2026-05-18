@@ -1,78 +1,17 @@
-function Invoke-MicrosoftSecurityComplianceCredentials($Credential)
-{
-	try
-	{
-		Write-Host "Connecting to Microsoft Security & Compliance..."
-		Connect-IPPSSession -Credential $Credential -ShowBanner:$false -ErrorAction Stop
- 		$Result = Get-PolicyConfig
-		if ($?)
-		{
-			Write-Host "Connected to Microsoft Security & Compliance!" -ForegroundColor DarkYellow -BackgroundColor Black
-			return $true
-		}
-		else
-		{
-			Write-ErrorLog 'Failed to Connect to Microsoft Security & Compliance' -ErrorRecord $_
-			return $false
-		}
+function Connect-M365SATSecurityComplianceDeviceCode {
+	try {
+		Write-Host "Connecting to Microsoft Security and Compliance using device code..."
+		Connect-IPPSSession -Device -ShowBanner:$false -ErrorAction Stop | Out-Null
+		Get-PolicyConfig -ErrorAction Stop | Out-Null
+		Write-Host "Connected to Microsoft Security and Compliance." -ForegroundColor DarkYellow -BackgroundColor Black
+		return $true
 	}
-	catch
-	{
-		Write-ErrorLog 'Failed to Connect to Microsoft Security & Compliance' -ErrorRecord $_
+	catch {
+		Write-Error "Failed to connect to Microsoft Security and Compliance. $($_.Exception.Message)"
 		return $false
 	}
-	
 }
 
-function Invoke-MicrosoftSecurityComplianceUsername($Username)
-{
-	try
-	{
-		Write-Host "Connecting to Microsoft Security & Compliance..."
-		Connect-IPPSSession -UserPrincipalName $Username -ShowBanner:$false -ErrorAction Stop
-		$Result = Get-PolicyConfig
-		if ($?)
-		{
-			Write-Host "Connected to Microsoft Security & Compliance!" -ForegroundColor DarkYellow -BackgroundColor Black
-			return $true
-		}
-		else
-		{
-			Write-ErrorLog 'Failed to Connect to Microsoft Security & Compliance' -ErrorRecord $_
-			return $false
-		}
-	}
-	catch
-	{
-		Write-ErrorLog 'Failed to Connect to Microsoft Security & Compliance' -ErrorRecord $_
-		return $false
-	}
-	
-}
-
-function Invoke-MicrosoftSecurityComplianceLite
-{
-	try
-	{
-		Write-Host "Connecting to Microsoft Security & Compliance..."
-		Connect-IPPSSession -ShowBanner:$false -ErrorAction Stop
-		$Result = Get-PolicyConfig
-		if ($?)
-		{
-			$OrgName = ((Get-AcceptedDomain |  Where-Object {  { $_.Default -eq 'True' } -and ($_.DomainName -like "*.onmicrosoft.com") -and ($_.DomainName -notlike "*mail.onmicrosoft.com") }).DomainName -split '.onmicrosoft.com')[0]
-			Write-Host "Connected to Microsoft Security & Compliance!" -ForegroundColor DarkYellow -BackgroundColor Black
-			return $OrgName
-		}
-		else
-		{
-			Write-ErrorLog 'Failed to Connect to Microsoft Security & Compliance' -ErrorRecord $_
-			return $false
-		}
-	}
-	catch
-	{
-		Write-ErrorLog 'Failed to Connect to Microsoft Security & Compliance' -ErrorRecord $_
-		return $false
-	}
-	
-}
+function Invoke-MicrosoftSecurityComplianceCredentials($Credential) { return Connect-M365SATSecurityComplianceDeviceCode }
+function Invoke-MicrosoftSecurityComplianceUsername($Username) { return Connect-M365SATSecurityComplianceDeviceCode }
+function Invoke-MicrosoftSecurityComplianceLite { return Connect-M365SATSecurityComplianceDeviceCode }
